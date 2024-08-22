@@ -1,2 +1,7 @@
 # chatgpt-alike
-uvicorn main:app --reload
+cd backend
+source venv/bin/activate
+python main.py
+
+cd frontend
+npm run start
