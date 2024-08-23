@@ -40,9 +40,19 @@ def get_openai_generator(prompt: str):
 async def stream(request: Request):
     return StreamingResponse(get_openai_generator(request.prompt), media_type='text/event-stream')
 
+#TODO
 @app.post("/store_api_key")
 async def store_api_key(api_key: APIKey):
     return {"data": api_key}
+
+#TODO
+@app.get("/api/models")
+async def get_ai_models():
+    model1 = {"name":"gpt-3","displayName":"GPT-3","context_limit":4000}
+    model2 = {"name":"gpt-4o","displayName":"GPT-4o","context_limit":8000}
+    model3 = {"name":"gpt-davici3","displayName":"Davici-3","context_limit":4000}
+    models = {"models":[model1,model2,model3]}
+    return models
 
 # Root endpoint for testing
 @app.get("/")
