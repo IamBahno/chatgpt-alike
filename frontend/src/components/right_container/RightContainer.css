@@ -1,0 +1,9 @@
+.right_container {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    flex-basis: 30%;
+    flex-shrink: 0.8;
+    margin: 10px;
+  }
+  

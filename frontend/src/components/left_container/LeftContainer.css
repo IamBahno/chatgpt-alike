@@ -1,0 +1,9 @@
+.left_container {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    flex-basis: 20%;
+    flex-shrink: 1;
+    margin: 10px;
+  }
+  
