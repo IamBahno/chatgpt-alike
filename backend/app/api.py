@@ -1,26 +1,45 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, APIRouter
 from fastapi.responses import StreamingResponse
 from openai import OpenAI
 import os
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from typing import List
+from . import models
+from .database import SessionLocal, engine
 
-# Initialize FastAPI app
-app = FastAPI()
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Update with your frontend URL
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# models.Base.metadata.create_all(bind=engine)
+
+# # Initialize FastAPI app
+# app = FastAPI()
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["http://localhost:3000"],  # Update with your frontend URL
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
+
+# # Dependency
+# def get_db():
+#     db = SessionLocal()
+#     try:
+#         yield db
+#     finally:
+#         db.close()
+
+
 load_dotenv()
+
+router = APIRouter()
+
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 class Request(BaseModel):
     prompt: str
 
+#TODO pridat ze checkne jestli key existuje
 class APIKey(BaseModel):
     api_key: str
 
@@ -36,17 +55,17 @@ def get_openai_generator(prompt: str):
             # important format
             yield "data: " + current_response + "\n\n"
 
-@app.post("/stream/sse")
+@router.post("/stream/sse")
 async def stream(request: Request):
     return StreamingResponse(get_openai_generator(request.prompt), media_type='text/event-stream')
 
 #TODO
-@app.post("/store_api_key")
+@router.post("/store_api_key")
 async def store_api_key(api_key: APIKey):
     return {"data": api_key}
 
 #TODO
-@app.get("/api/models")
+@router.get("/models")
 async def get_ai_models():
     model1 = {"name":"gpt-3","displayName":"GPT-3","context_limit":4000}
     model2 = {"name":"gpt-4o","displayName":"GPT-4o","context_limit":8000}
@@ -55,7 +74,7 @@ async def get_ai_models():
     return models
 
 #TODO
-@app.get("/api/threads")
+@router.get("/threads")
 async def get_chat_threads():
     model1 = {"name":"gpt-3","displayName":"GPT-3","context_limit":4000}
     model2 = {"name":"gpt-4o","displayName":"GPT-4o","context_limit":8000}
@@ -69,7 +88,7 @@ class LoginCredentials(BaseModel):
 
 
 #TODO
-@app.post("/api/login")
+@router.post("/login")
 async def login(credentials: LoginCredentials):
     print(f"username {credentials.username}")
     print(f"password {credentials.password}")
@@ -81,8 +100,24 @@ class RegisterForm(BaseModel):
     username: str
     password: str
 
+class Chat():
+    def __init__(self):
+        pass
+
+class User():
+    def __init__(self,username,password,api_key=None):
+        self.username = username
+        self.password = password
+        self.api_key = api_key
+        self.chats = []
+
+    def _set_api_key(self,api_key):
+        self.api_key = api_key
+
+
+
 #TODO
-@app.post("/api/register")
+@router.post("/register")
 async def login(register_form: RegisterForm):
     response = {"succes":False,"message":"Username already used"}
     # response = {"succes":True,"message":"Register was succesful"}
@@ -90,6 +125,6 @@ async def login(register_form: RegisterForm):
 
 
 # Root endpoint for testing
-@app.get("/")
+@router.get("/")
 async def root():
     return {"message": "ChatGPT-like API with FastAPI is running!"}
