@@ -10,7 +10,6 @@ from . import models
 from .database import SessionLocal, engine
 from app import api
 
-
 models.Base.metadata.create_all(bind=engine)
 
 # Initialize FastAPI app

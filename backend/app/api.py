@@ -8,27 +8,7 @@ from pydantic import BaseModel
 from typing import List
 from . import models
 from .database import SessionLocal, engine
-
-# models.Base.metadata.create_all(bind=engine)
-
-# # Initialize FastAPI app
-# app = FastAPI()
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=["http://localhost:3000"],  # Update with your frontend URL
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# )
-
-# # Dependency
-# def get_db():
-#     db = SessionLocal()
-#     try:
-#         yield db
-#     finally:
-#         db.close()
-
+import app.schemas
 
 load_dotenv()
 
