@@ -54,6 +54,41 @@ async def get_ai_models():
     models = {"models":[model1,model2,model3]}
     return models
 
+#TODO
+@app.get("/api/threads")
+async def get_chat_threads():
+    model1 = {"name":"gpt-3","displayName":"GPT-3","context_limit":4000}
+    model2 = {"name":"gpt-4o","displayName":"GPT-4o","context_limit":8000}
+    model3 = {"name":"gpt-davici3","displayName":"Davici-3","context_limit":4000}
+    models = {"models":[model1,model2,model3]}
+    return models
+
+class LoginCredentials(BaseModel):
+    username: str
+    password: str
+
+
+#TODO
+@app.post("/api/login")
+async def login(credentials: LoginCredentials):
+    print(f"username {credentials.username}")
+    print(f"password {credentials.password}")
+    response = {"success":True,"message":"Loggin, was succesful","api_key":"aaaaa"}
+    # response = {"succes":False,"message":"Wrong name or password"}
+    return response
+
+class RegisterForm(BaseModel):
+    username: str
+    password: str
+
+#TODO
+@app.post("/api/register")
+async def login(register_form: RegisterForm):
+    response = {"succes":False,"message":"Username already used"}
+    # response = {"succes":True,"message":"Register was succesful"}
+    return response
+
+
 # Root endpoint for testing
 @app.get("/")
 async def root():

@@ -1,11 +1,30 @@
-import React, { useState } from 'react';
-import CryptoJS from 'crypto-js';
+import React, { useState,useEffect } from 'react';
 
-function ApiKeyInputComponent() {
-  const [apiKey, setApiKey] = useState('');
+function ApiKeyInputComponent({ onApiKeyChange, initialApiKey }) {
+  const [apiKey, setApiKey] = useState(initialApiKey||'');
+  const [isManuallyChanged, setIsManuallyChanged] = useState(false);
+
+  // Update the input field when initialApiKey changes, but only if it wasn't manually changed
+  useEffect(() => {
+    if (!isManuallyChanged) {
+      setApiKey(initialApiKey);
+    }
+  }, [initialApiKey]);
+
+    // Notify the parent component whenever the apiKey changes due to user input
+    useEffect(() => {
+      if (isManuallyChanged) {
+        onApiKeyChange(apiKey);
+      }
+    }, [apiKey, isManuallyChanged, onApiKeyChange]);
+
+    const handleChange = (e) => {
+      setApiKey(e.target.value);
+      setIsManuallyChanged(true);
+    };
+  
 
   const handleSubmit = () => {
-    
     fetch('http://localhost:8000/store_api_key', {
       method: 'POST',
       headers: {
@@ -24,11 +43,10 @@ function ApiKeyInputComponent() {
 
   return (
     <div>
-      <h2>Enter your OpenAI API Key</h2>
       <input
         type="password"
         value={apiKey}
-        onChange={(e) => setApiKey(e.target.value)}
+        onChange={handleChange}
         placeholder="Enter API Key"
       />
       <button onClick={handleSubmit}>Save API Key</button>
