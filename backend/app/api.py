@@ -10,11 +10,14 @@ from . import models
 from .database import SessionLocal, engine
 import app.schemas
 
+
 load_dotenv()
 
 router = APIRouter()
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+
 
 class Request(BaseModel):
     prompt: str

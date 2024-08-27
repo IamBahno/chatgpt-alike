@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from . import models
 from .database import SessionLocal, engine
 from app import api
+from app import auth
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -16,18 +17,19 @@ models.Base.metadata.create_all(bind=engine)
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Update with your frontend URL
+    # allow_origins=["http://localhost:3000"],  # Update with your frontend URL
+    allow_origins=["*"],  # Update with your frontend URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Dependency
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
-app.include_router(api.router, tags=['Notes'], prefix='')
+
+@app.get("/")
+def root():
+    return {"message": "Welcome to FastAPI with SQLAlchemy"}
+
+
+app.include_router(api.router, tags=['Notes'], prefix='/api')
+app.include_router(auth.router, tags=['Notes'], prefix='/auth')

@@ -16,9 +16,9 @@ class PromptRequest(BaseModel):
 # cannot define responce, since the response is streaming
 
 
-class LoginRequest(BaseModel):
-    username: str
-    password: str
+# class LoginRequest(BaseModel):
+#     username: str
+#     password: str
 
 class RegisterRequest(BaseModel):
     username: str

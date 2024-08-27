@@ -9,8 +9,10 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    username = Column(String)
+    username = Column(String, unique = True)
     hashed_password = Column(String)
+    api_key = Column(String, unique = True)
+    is_registered = Column(Boolean)
 
     chats = relationship("Chat", back_populates="owner")
 
@@ -26,6 +28,7 @@ class ChatOption(Base):
 
     # Foreign key to the Chat table
     chat_id = Column(Integer, ForeignKey('chats.id'), nullable=False)    
+    chat = relationship("Chat",back_populates="option")
 
 
 class Chat(Base):
@@ -64,8 +67,10 @@ class ConversationEntry(Base):
 
 
     # Relationships
-    user_prompt = relationship('Message',uselist=False, backref = "conversation_entry")
-    ai_response = relationship('Message',uselist=False, backref ="conversation_entry")
+    # user_prompt = relationship('Message',uselist=False, backref = "conversation_entry")
+    # ai_response = relationship('Message',uselist=False, backref = "conversation_entry")
+    user_prompt = relationship('Message',uselist=False)
+    ai_response = relationship('Message',uselist=False)
 
     # with chat
     chat_id = Column(Integer, ForeignKey('chats.id'))
