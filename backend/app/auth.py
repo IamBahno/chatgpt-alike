@@ -5,10 +5,11 @@ from passlib.context import CryptContext
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
 from .database import get_db
-from .schemas import GeneralResponse, SetKeyRequest
+from .schemas import GeneralResponse, SetKeyRequest, RegisterRequest, LoginRequest
 from sqlalchemy.orm import Session
 from .models import User as UserModel
-from sqlalchemy.exc import NoResultFound 
+from sqlalchemy.exc import NoResultFound,IntegrityError 
+import bcrypt
 
 router = APIRouter()
 
@@ -20,7 +21,8 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # OAuth2 password flow for token generation
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+# if used as depends, it will check if 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 # In-memory user "database" for demonstration purposes
 fake_users_db = {
@@ -52,17 +54,8 @@ class TokenData(BaseModel):
 
 class User(BaseModel):
     username: str | None = None
-    email: str | None = None
-    full_name: str | None = None
-    disabled: bool | None = None
 
-class UserInDB(User):
-    hashed_password: str
-    api_key: str
 
-# Helper functions
-def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
 
 def get_user_by_username(db, username: str,exception=NoResultFound):
     try:
@@ -70,22 +63,18 @@ def get_user_by_username(db, username: str,exception=NoResultFound):
         return user
     except NoResultFound:
         raise exception
-    # return UserInDB(**user_dict)
 
-def get_user_by_api_key(db, api_key: str,exception=NoResultFound):
+def get_user(db, id: int,exception=NoResultFound):
     try:
-        print(f"finding: {api_key}")
-        users = db.query(UserModel).all()
-        for i in users:
-            print(i.id,i.api_key)
-        user = db.query(UserModel).filter(UserModel.api_key == api_key).one()
+        user = db.query(UserModel).filter(UserModel.id == id).one()
         return user
     except NoResultFound:
         raise exception
 
-def authenticate_user(fake_db, username: str, password: str):
-    user = get_user_by_username(fake_db, username)
-    if not user:
+def authenticate_user(db, username: str, password: str):
+    try:
+        user = get_user_by_username(db, username)
+    except NoResultFound:
         return False
     if not verify_password(password, user.hashed_password):
         return False
@@ -101,7 +90,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-async def get_current_user(token: str = Depends(oauth2_scheme)):
+async def get_current_user(token: str = Depends(oauth2_scheme),db: Session = Depends(get_db)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -110,14 +99,12 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub",None)
-        api_key: str = payload.get("api_key",None)
-        if username is None and api_key is None:
+        user_id: str = payload.get("user_id",None)
+        if (username is None or username == "") and user_id is None:
             raise credentials_exception
-        token_data = TokenData(username=username)
-        if username is None:
-            user = get_user_by_api_key(fake_users_db, api_key=token_data.api_key)
-        else:
-            user = get_user_by_username(fake_users_db, username==token_data.username)
+        if user_id is None:
+            raise credentials_exception
+        user = get_user(db, id=user_id,exception=NoResultFound)
     except JWTError:
         raise credentials_exception
     except:
@@ -126,37 +113,42 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         raise credentials_exception
     return user
 
-async def get_current_user_or_create_one(set_key_request:SetKeyRequest,token: str = Depends(oauth2_scheme),db: Session = Depends(get_db),):
+async def get_current_user_or_create_one(token: str = Depends(oauth2_scheme),db: Session = Depends(get_db)):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub",None)
-        api_key: str = payload.get("api_key",None)
-        if username is None and api_key is None:
+        user_id: str = payload.get("user_id",None)
+        if (username is None or username == "") and user_id is None:
             raise JWTError 
-        if username is None or username == "":
-            try:
-                user = get_user_by_api_key(db, api_key=api_key,exception=NoResultFound)
-                print("get old user by old api key")
-            except NoResultFound:
-                user = UserModel()
-                print("generate new user, no user with api key found in jwt")
-        else:
-            print("2")
-            user = get_user_by_username(db, username==username, exception=JWTError)
-        # print(user.id)
-        # print(user.api_key)
+        try:
+            user = get_user(db, id=user_id,exception=NoResultFound)
+            print("get old user by id")
+        except NoResultFound:
+            user = UserModel()
+            print("generate new user, no user with id found in jwt")
     except JWTError: #didnt send valid jwt token
         print("create empty user")
         user =  UserModel()
     return user
 
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    # Check if the hashed password matches the plain password
+    return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
 
+def hash_password(password: str) -> str:
+    # Generate a salt and hash the password
+    salt = bcrypt.gensalt()
+    hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
+    return hashed_password.decode('utf-8')  # Convert back to string for storage
+
+#just for showcase at this point
 @router.get("/users/me", response_model=User)
 async def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
 
 @router.post("/login", response_model=Token)
 async def login(form_data: OAuth2PasswordRequestForm = Depends(),db: Session = Depends(get_db)):
+# async def login(form_data: LoginRequest,db: Session = Depends(get_db)):
     user = authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
@@ -166,25 +158,48 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(),db: Session = D
         )
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.username,"api_key":user.api_key}, expires_delta=access_token_expires
+        data={"sub": user.username,"usr_id":user.id}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
+@router.post("/register", response_model=Token)
+async def register(register_data: RegisterRequest,db: Session = Depends(get_db)):
+    if register_data.password != register_data.password_again:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Passwords do not match."
+        )
+    try:
+        user = UserModel(hashed_password=hash_password(register_data.password),
+                         username=register_data.username,
+                         is_registered=True)
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+    except IntegrityError as e:
+        raise HTTPException(status_code=400, detail="Username already exists.")
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user.username,"user_id":user.id}, expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
 
-#TODO dodelat funkcnost aby to mohl posilat i loglej user
-#TODO zkontrolovat jak to funguje kdyz se opakuje api_key
+    
+
+
+#TODO dodelat funkcnost aby to mohl posilat i loglej user(mozna funguje tezko se testuje)
 # if user is logged in update his api key and return token
-# if user is not logged in create empty user with api key and return key
+# if user is not logged in create empty user with api key and return token
 # if is not logged in but already gave api_key, update his model and return token 
 @router.post("/api_key",response_model=Token)
 async def set_api_key(set_key_request:SetKeyRequest,db: Session = Depends(get_db),
-                      current_user: User = Depends(get_current_user_or_create_one)):
+                      current_user: UserModel = Depends(get_current_user_or_create_one)):
     current_user.api_key = set_key_request.api_key
     db.add(current_user)
     db.commit()
     db.refresh(current_user)
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": current_user.username if current_user.username else "","api_key":current_user.api_key if current_user.api_key else ""}, expires_delta=access_token_expires
+        data={"sub": current_user.username if current_user.username else "","user_id":current_user.id}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}

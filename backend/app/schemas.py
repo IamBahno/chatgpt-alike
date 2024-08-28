@@ -16,13 +16,14 @@ class PromptRequest(BaseModel):
 # cannot define responce, since the response is streaming
 
 
-# class LoginRequest(BaseModel):
-#     username: str
-#     password: str
+class LoginRequest(BaseModel):
+    username: str
+    password: str
 
 class RegisterRequest(BaseModel):
     username: str
     password: str
+    password_again: str
 
 class SetKeyRequest(BaseModel):
     api_key: str
