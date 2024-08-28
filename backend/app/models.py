@@ -53,7 +53,7 @@ class Message(Base):
     text = Column(Text)
     tokens = Column(Integer)
 
-    conversation_entry_id = Column(Integer, ForeignKey("conversation_entries.id"))
+    conversation_entry_id = Column(Integer, ForeignKey("conversation_entries.id",ondelete="CASCADE"))
 
 # TODO vyresit chybu s  tema dvema messages
 # stores the question the response and the context send with the question
@@ -67,12 +67,18 @@ class ConversationEntry(Base):
     cost = Column(Float) # in dollars
 
 
-    # Relationships
-    # user_prompt = relationship('Message',uselist=False, backref = "conversation_entry")
-    # ai_response = relationship('Message',uselist=False, backref = "conversation_entry")
-    user_prompt = relationship('Message',uselist=False)
-    ai_response = relationship('Message',uselist=False)
+ # Foreign keys for the user and AI messages
+    user_message_id = Column(Integer, ForeignKey('messages.id'))
+    ai_message_id = Column(Integer, ForeignKey('messages.id'))
+
+    # Relationships to user and AI messages
+    user_prompt = relationship('Message', foreign_keys=[user_message_id], backref='user_conversation_entry')
+    ai_response = relationship('Message', foreign_keys=[ai_message_id], backref='ai_conversation_entry')
+
 
     # with chat
     chat_id = Column(Integer, ForeignKey('chats.id'))
     chat = relationship("Chat", back_populates="conversation_entries")
+
+    # user_prompt = relationship('Message',uselist=False, backref = "conversation_entry")
+    # ai_response = relationship('Message',uselist=False, backref = "conversation_entry")

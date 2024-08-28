@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, status, APIRouter
+from fastapi import FastAPI, Depends, HTTPException, status, APIRouter, Request
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from passlib.context import CryptContext
@@ -124,21 +124,31 @@ async def get_current_user(token: str = Depends(oauth2_scheme),db: Session = Dep
         raise credentials_exception
     return user
 
-async def get_current_user_or_create_one(token: str = Depends(oauth2_scheme),db: Session = Depends(get_db)):
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub",None)
-        user_id: str = payload.get("user_id",None)
-        if (username is None or username == "") and user_id is None:
-            raise JWTError 
+async def get_current_user_or_create_one(request: Request,db: Session = Depends(get_db)):
+    auth_header = request.headers.get("Authorization")
+    token = None
+
+    if auth_header and auth_header.startswith("Bearer "):
+        token = auth_header.split(" ")[1]
+
+    if token:
         try:
-            user = get_user(db, id=user_id,exception=NoResultFound)
-            print("get old user by id")
-        except NoResultFound:
-            user = UserModel()
-            print("generate new user, no user with id found in jwt")
-    except JWTError: #didnt send valid jwt token
-        print("create empty user")
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            username: str = payload.get("sub",None)
+            user_id: str = payload.get("user_id",None)
+            if (username is None or username == "") and user_id is None:
+                raise JWTError 
+            try:
+                user = get_user(db, id=user_id,exception=NoResultFound)
+                print("get old user by id")
+            except NoResultFound:
+                user = UserModel()
+                print("generate new user, no user with id found in jwt")
+        except JWTError: #didnt send valid jwt token
+            print("create empty user")
+            user =  UserModel()
+    else:
+        print("no token provided")
         user =  UserModel()
     return user
 
@@ -171,7 +181,9 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(),db: Session = D
     access_token = create_access_token(
         data={"sub": user.username,"user_id":user.id}, expires_delta=access_token_expires
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    refresh_token = create_refresh_token(
+        data={"sub": user.username if user.username else "","user_id": user.id})
+    return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
 
 @router.post("/register", response_model=Token)
 async def register(register_data: RegisterRequest,db: Session = Depends(get_db)):
@@ -193,7 +205,9 @@ async def register(register_data: RegisterRequest,db: Session = Depends(get_db))
     access_token = create_access_token(
         data={"sub": user.username,"user_id":user.id}, expires_delta=access_token_expires
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    refresh_token = create_refresh_token(
+        data={"sub": user.username,"user_id":user.id})
+    return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
 
     
 @router.post("/refresh", response_model=Token)
@@ -219,6 +233,7 @@ async def refresh_token(refresh_token: str, db: Session = Depends(get_db)):
 
 
 #TODO dodelat funkcnost aby to mohl posilat i loglej user(mozna funguje tezko se testuje)
+#TODO obcas user bez tokenu posle, kterej uz mel nekdo jinej(treba on), a vytvori se novej user se stejnym api_key, co udela uniquenest constraint
 # if user is logged in update his api key and return token
 # if user is not logged in create empty user with api key and return token
 # if is not logged in but already gave api_key, update his model and return token 
