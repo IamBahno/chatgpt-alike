@@ -10,12 +10,15 @@ from sqlalchemy.orm import Session
 from .models import User as UserModel
 from sqlalchemy.exc import NoResultFound,IntegrityError 
 import bcrypt
+import os
 
 router = APIRouter()
 
 SECRET_KEY = "your_secret_key"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
+JWT_REFRESH_SECRET_KEY = 'JWT_REFRESH_SECRET_KEY'
+REFRESH_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7
 
 # Password hashing context
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -90,6 +93,14 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
+
+def create_refresh_token(data: dict, expires_delta: timedelta | None = None) -> str:
+    to_encode = data.copy()
+    expire = datetime.utcnow() + expires_delta if expires_delta else datetime.utcnow() + timedelta(minutes=REFRESH_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, JWT_REFRESH_SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
 async def get_current_user(token: str = Depends(oauth2_scheme),db: Session = Depends(get_db)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -158,7 +169,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(),db: Session = D
         )
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.username,"usr_id":user.id}, expires_delta=access_token_expires
+        data={"sub": user.username,"user_id":user.id}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
@@ -185,6 +196,26 @@ async def register(register_data: RegisterRequest,db: Session = Depends(get_db))
     return {"access_token": access_token, "token_type": "bearer"}
 
     
+@router.post("/refresh", response_model=Token)
+async def refresh_token(refresh_token: str, db: Session = Depends(get_db)):
+    try:
+        payload = jwt.decode(refresh_token, JWT_REFRESH_SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        user_id: str = payload.get("user_id")
+        if username is None or user_id is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token.")
+        user = get_user(db, id=user_id, exception=NoResultFound)
+        if user is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found.")
+        
+        # Generate new access token
+        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = create_access_token(data={"sub": user.username, "user_id": user.id}, expires_delta=access_token_expires)
+        new_refresh_token = create_refresh_token(data={"sub": user.username, "user_id": user.id})
+
+        return {"access_token": access_token, "refresh_token": new_refresh_token, "token_type": "bearer"}
+    except JWTError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate refresh token.")
 
 
 #TODO dodelat funkcnost aby to mohl posilat i loglej user(mozna funguje tezko se testuje)
@@ -202,4 +233,7 @@ async def set_api_key(set_key_request:SetKeyRequest,db: Session = Depends(get_db
     access_token = create_access_token(
         data={"sub": current_user.username if current_user.username else "","user_id":current_user.id}, expires_delta=access_token_expires
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    refresh_token = create_refresh_token(
+        data={"sub": current_user.username if current_user.username else "","user_id":current_user.id})
+    return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
+
