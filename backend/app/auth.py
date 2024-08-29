@@ -55,9 +55,6 @@ class TokenData(BaseModel):
     username: str | None = None
     api_key: str | None = None
 
-class User(BaseModel):
-    username: str | None = None
-
 
 
 def get_user_by_username(db, username: str,exception=NoResultFound):
@@ -124,6 +121,32 @@ async def get_current_user(token: str = Depends(oauth2_scheme),db: Session = Dep
         raise credentials_exception
     return user
 
+async def get_current_user_or_none(request: Request,db: Session = Depends(get_db)):
+    auth_header = request.headers.get("Authorization")
+    token = None
+
+    if auth_header and auth_header.startswith("Bearer "):
+        token = auth_header.split(" ")[1]
+
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            username: str = payload.get("sub",None)
+            user_id: str = payload.get("user_id",None)
+            if (username is None or username == "") and user_id is None:
+                raise JWTError 
+            try:
+                user = get_user(db, id=user_id,exception=NoResultFound)
+                print("get old user by id")
+            except NoResultFound:
+                user = None
+        except JWTError: #didnt send valid jwt token
+            user =  None
+    else:
+        print("no token provided")
+        user =  None
+    return user
+
 async def get_current_user_or_create_one(request: Request,db: Session = Depends(get_db)):
     auth_header = request.headers.get("Authorization")
     token = None
@@ -161,11 +184,6 @@ def hash_password(password: str) -> str:
     salt = bcrypt.gensalt()
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
     return hashed_password.decode('utf-8')  # Convert back to string for storage
-
-#just for showcase at this point
-@router.get("/users/me", response_model=User)
-async def read_users_me(current_user: User = Depends(get_current_user)):
-    return current_user
 
 @router.post("/login", response_model=Token)
 async def login(form_data: OAuth2PasswordRequestForm = Depends(),db: Session = Depends(get_db)):

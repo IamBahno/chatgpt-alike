@@ -20,7 +20,7 @@ class User(Base):
 class ChatOption(Base):
     __tablename__ = 'chat_options'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    use_context = Column(Boolean)  # If use the history context
+    use_history = Column(Boolean)  # If use the history context
     llm_model = Column(String)
     history_type = Column(String) #last_tokens, n_best_responses
     n_last_tokens = Column(Integer) # for the n last tokens
