@@ -1,5 +1,5 @@
 import React from 'react';
-import './/MiddleContainer.css'
+import './MiddleContainer.css'
 import ChatContainer from './ChatContainer';
 
 function Column1() {

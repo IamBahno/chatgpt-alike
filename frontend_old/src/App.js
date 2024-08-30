@@ -10,10 +10,7 @@ import RightContainer from './components/right_container/RightContainer'
 function App() {
   return (
     <div className="App">
-      {/* <ApiKeyInputComponent/> */}
-      {/* <SSEComponent /> */}
       <div className="page_container">
-        {/* <div className="threads_bar">Column 1</div> */}
         <LeftContainer/>
         <MiddleContainer/>
         <RightContainer/>

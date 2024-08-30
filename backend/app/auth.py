@@ -186,8 +186,8 @@ def hash_password(password: str) -> str:
     return hashed_password.decode('utf-8')  # Convert back to string for storage
 
 @router.post("/login", response_model=Token)
-async def login(form_data: OAuth2PasswordRequestForm = Depends(),db: Session = Depends(get_db)):
-# async def login(form_data: LoginRequest,db: Session = Depends(get_db)):
+# async def login(form_data: OAuth2PasswordRequestForm = Depends(),db: Session = Depends(get_db)):
+async def login(form_data: LoginRequest,db: Session = Depends(get_db)):
     user = authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
