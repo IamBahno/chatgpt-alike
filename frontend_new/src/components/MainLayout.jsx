@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import ChatList from './ChatList';
-// import ChatWindow from './ChatWindow';
+import ChatWindow from './ChatWindow';
 // import UserSettings from './UserSettings';
 import { AppContext } from '../App';
 import './MainLayout.css'; // Import a CSS file for styling
@@ -13,8 +13,8 @@ const MainLayout = () => {
       <div className="chat-list-container">
         <ChatList onSelectChat={handleSelectChat} />
       </div>
-      <div className="chat-window-container">
-        {/* <ChatWindow currentChat={currentChat} /> */}
+        <div className="chat-window-container">
+        <ChatWindow currentChat={currentChat} />
         {/* <UserSettings preferences={userPreferences} onUpdatePreferences={handleUpdatePreferences} /> */}
       </div>
     </div>

@@ -1,0 +1,39 @@
+/* src/components/ChatDisplay.css */
+
+.chat-display {
+    padding: 20px;
+    max-height: 500px;
+    overflow-y: auto; /* Allows scrolling if content overflows */
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  .conversation-entry {
+    margin-bottom: 15px;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .chat-message.user {
+    color: #007bff; /* Color for user messages */
+    margin-bottom: 5px;
+  }
+  
+  .chat-message.ai {
+    color: #28a745; /* Color for AI messages */
+    margin-bottom: 5px;
+  }
+  
+  .entry-details {
+    font-size: 0.85em;
+    color: #555;
+  }
+  
+  .cost {
+    margin-right: 10px;
+  }
+  
+  .timestamp {
+    color: #888;
+  }
+  
