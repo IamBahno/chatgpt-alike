@@ -1,5 +1,19 @@
+/* src/components/MainLayout.css */
+
 .main-layout {
-    display: grid;
-    grid-template-columns: 1fr 3fr 1fr;
-    height: 100vh;
-  }
+  display: flex;
+  height: 100vh; /* Make the layout take the full viewport height */
+}
+
+.chat-list-container {
+  flex: 0 0 250px; /* Fixed width for the chat list sidebar */
+  background-color: #f4f4f4; /* Background color for sidebar */
+  border-right: 1px solid #ddd; /* Optional: Add a border to separate from the main content */
+  overflow-y: auto; /* Allow scrolling if chat list gets too long */
+}
+
+.chat-window-container {
+  flex: 1; /* Take up the remaining space */
+  padding: 20px; /* Add some padding for content */
+  overflow-y: auto; /* Allow scrolling if content is too long */
+}

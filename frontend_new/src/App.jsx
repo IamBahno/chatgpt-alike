@@ -22,19 +22,19 @@ const App = () => {
 
   // Effect to fetch user data if a JWT token exists
   useEffect(() => {
-    if (jwtToken) {
+    if (accessToken) {
       axios.get('/api/users/me', {
         headers: {
-          Authorization: `Bearer ${jwtToken}`
+          Authorization: `Bearer ${accessToken}`
         }
       })
       .then(response => setCurrentUser(response.data))
       .catch(() => {
         setJwtToken('');
-        localStorage.removeItem('jwtToken');
+        localStorage.removeItem('accessToken');
       });
     }
-  }, [jwtToken]);
+  }, [accessToken]);
 
 // Function to handle login, setting JWT tokens and fetching user data
 const handleLogin = (accessToken, refreshToken) => {
@@ -65,7 +65,7 @@ const handleLogout = () => {
   return (
     <AppContext.Provider
       value={{
-        jwtToken,
+        accessToken,
         currentUser,
         chats,
         currentChat,

@@ -32,9 +32,9 @@ async def get_all_chats(db: Session = Depends(get_db),
                         user: User|None = Depends(get_current_user_or_none)) -> ChatsListResponse:
     if(user == None):
         return ChatsListResponse(chats=[])
-    chats = db.query(Chat).filter(Chat.owner_id == user).all()
+    chats = db.query(Chat).filter(Chat.owner_id == user.id).all()
     chat_schemas = [ChatListItem(id=chat.id, title=chat.title) for chat in chats]
-    return ChatsListResponse(chat_schemas)
+    return ChatsListResponse(chats=chat_schemas)
     
 
 
