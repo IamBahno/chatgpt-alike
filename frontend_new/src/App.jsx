@@ -4,7 +4,7 @@ import Header from './components/Header';
 import MainLayout from './components/MainLayout';
 import Footer from './components/Footer';
 import axios from 'axios';
-
+// TODO ukazuje to ze je nekdo registrovanej potom co odeslu klic
 // Context to share JWT token and user data across the app
 export const AppContext = createContext();
 
@@ -15,12 +15,11 @@ const App = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [chats, setChats] = useState([]);
   const [currentChat, setCurrentChat] = useState(null);
-  const [userPreferences, setUserPreferences] = useState({
-    apiKey: '',
-    model: 'gpt-3.5-turbo'
-  });
+  const [optionsData, setOptionsData] = useState(null);
+  const [apiKey, setApiKey] = useState(localStorage.getItem('apiKey') || '');
 
   // Effect to fetch user data if a JWT token exists
+  // TODO on backend
   useEffect(() => {
     if (accessToken) {
       axios.get('/api/users/me', {
@@ -55,13 +54,18 @@ const handleLogout = () => {
   // Function to select a chat
   const handleSelectChat = (chat) => {
     setCurrentChat(chat);
+    console.log("Aaa");
   };
 
   // Function to update user preferences (API key and model)
-  const handleUpdatePreferences = (preferences) => {
-    setUserPreferences(preferences);
+  const handleUpdateOptions = (preferences) => {
+    setOptionsData(preferences); // Clear user data from state
+    localStorage.setItem('optionsData', preferences); // Store access token in localStorage
   };
-
+  const handleApiKey = (key) => {
+    setApiKey(key); // Clear user data from state
+    localStorage.setItem('apiKey', apiKey); // Store access token in localStorage
+  };
   return (
     <AppContext.Provider
       value={{
@@ -69,11 +73,14 @@ const handleLogout = () => {
         currentUser,
         chats,
         currentChat,
-        userPreferences,
+        optionsData,
+        apiKey,
         handleLogin,
         handleLogout,
         handleSelectChat,
-        handleUpdatePreferences
+        setCurrentChat,
+        handleUpdateOptions,
+        handleApiKey,
       }}
     >
       <Router>

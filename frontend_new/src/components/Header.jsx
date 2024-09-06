@@ -3,7 +3,7 @@ import { AppContext } from '../App';
 import './Header.css'; // Assuming there's a CSS file for styling
 
 const Header = () => {
-  const { jwtToken, currentUser, handleLogin, handleLogout } = useContext(AppContext);
+  const { currentUser, handleLogin, handleLogout } = useContext(AppContext);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [username, setUsername] = useState('');
@@ -66,7 +66,7 @@ const Header = () => {
         <h1>AI Chat App</h1>
       </div>
       <nav className="nav">
-        {currentUser ? (
+        {currentUser && currentUser.is_registered ? (
           <div className="user-info">
             <span>Welcome, {currentUser.username}!</span>
             <button onClick={handleLogout}>Logout</button>

@@ -5,7 +5,7 @@ from passlib.context import CryptContext
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
 from .database import get_db
-from .schemas import GeneralResponse, SetKeyRequest, RegisterRequest, LoginRequest
+from .schemas import GeneralResponse, SetKeyRequest, RegisterRequest, LoginRequest, User
 from sqlalchemy.orm import Session
 from .models import User as UserModel
 from sqlalchemy.exc import NoResultFound,IntegrityError 
@@ -49,6 +49,7 @@ fake_users_db = {
 # Pydantic models
 class Token(BaseModel):
     access_token: str
+    refresh_token: str
     token_type: str
 
 class TokenData(BaseModel):
@@ -184,6 +185,11 @@ def hash_password(password: str) -> str:
     salt = bcrypt.gensalt()
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
     return hashed_password.decode('utf-8')  # Convert back to string for storage
+
+@router.post("/users/me")
+async def me(user: UserModel = Depends(get_current_user)):
+    return User(username = user.username, is_registered = user.is_registered)
+
 
 @router.post("/login", response_model=Token)
 # async def login(form_data: OAuth2PasswordRequestForm = Depends(),db: Session = Depends(get_db)):

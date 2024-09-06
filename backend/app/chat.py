@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException, APIRouter, Depends
 from sqlalchemy.orm import Session
 from fastapi.responses import StreamingResponse
 from sse_starlette.sse import EventSourceResponse
-import openai
+from openai import OpenAI
 from dotenv import load_dotenv
 import tiktoken
 import os
@@ -18,13 +18,14 @@ load_dotenv()
 
 DEFAULT_OPTIONS = {
     "use_history":True,
-    "llm_model":"gpt-3.5",
+    "llm_model":"gpt-3.5-turbo",
     "history_type":"last_tokens",  #predefined string
     "n_last_tokens":2000, # for the n last tokens
     "n_best_tokens":2000 # for the n best responses
     }
 
 
+#TODO oddelat zarazku
 #TODO otestovat, kdyz ma user token
 #TODO otestovat, kdyz ma user token a ma ulozeny chaty
 @router.get("/chats")
@@ -32,6 +33,7 @@ async def get_all_chats(db: Session = Depends(get_db),
                         user: User|None = Depends(get_current_user_or_none)) -> ChatsListResponse:
     if(user == None):
         return ChatsListResponse(chats=[])
+    return ChatsListResponse(chats=[])
     chats = db.query(Chat).filter(Chat.owner_id == user.id).all()
     chat_schemas = [ChatListItem(id=chat.id, title=chat.title) for chat in chats]
     return ChatsListResponse(chats=chat_schemas)
@@ -73,12 +75,12 @@ def save_chat_entry(chat : Chat,user_prompt: str, user_prompt_tokens:int, ai_res
 # #TODO pridat ten historickej context
 # TODO pridat count vypocet
 # TODO samozrejme otestovat
-def get_openai_generator(prompt: str, options: ChatOption, chat: Chat,user:User):
-    openai_stream = openai.chat.completions.create(
+def get_openai_generator(prompt: str, options: ChatOption, chat: Chat,user:User,db: Session):
+    client = OpenAI(api_key = user.api_key)
+    openai_stream = client.chat.completions.create(
         model=options.llm_model,
         messages=[{"role": "user", "content": prompt}],
         temperature=0.0,
-        api_key = user.api_key,
         stream=True
     )
     encoding = tiktoken.encoding_for_model("gpt-3.5-turbo")
@@ -94,10 +96,10 @@ def get_openai_generator(prompt: str, options: ChatOption, chat: Chat,user:User)
     tokens_generated_count = len(encoding.encode(full_response))
     input_token_count = len(encoding.encode(prompt))
     cost = 0.0  # Example cost calculation
-    yield {"type": "final", "data": {"cost": cost, "chat_id": chat.id}}
+    yield {"type": "final", "data": {"cost": cost, "chat_id": chat.id, "chat_title":chat.title}}
 
     # Perform post-processing, such as saving to the database
-    save_chat_entry(chat=Chat,user_prompt=prompt,user_prompt_tokens=input_token_count,ai_response=full_response,cost=cost)  # Save after streaming
+    save_chat_entry(chat=Chat,user_prompt=prompt,user_prompt_tokens=input_token_count,ai_response=full_response,ai_response_tokens=tokens_generated_count,cost=cost)  # Save after streaming
 
 # TODO otestovat
 # TODO umazat database transakce jak pudou
@@ -107,24 +109,29 @@ async def respond_to_first_message(promt_request: FirstPromptRequest,db: Session
     if user.api_key in [None,""]:
         print("user nema api key")
         raise
-    # vytvorim chatoptions model
-    chat_options = ChatOption(**promt_request.options)
-    db.add(chat_options)
-    db.commit(chat_options)
-    db.refresh(chat_options)
+    
     # dostanu user model
-    user = db.query(User).filter(User.id == user.id).first()
+    # user = db.query(User).filter(User.id == user.id).first()
+    user = db.merge(user)
+
     # vytvorim chat model
-    chat = Chat(owner = user, option = chat_options)
+    chat = Chat(owner = user)
     db.add(chat)
-    db.commit(chat)
+    db.commit()
     db.refresh(chat)
+
+    # vytvorim chatoptions model
+    chat_options = ChatOption(**promt_request.options.dict(), chat_id=chat.id)
+    db.add(chat_options)
+    db.commit()
+    db.refresh(chat_options)
 
 
     # odstreamuju odpoved
     async def event_generator():
-        generator = get_openai_generator(promt_request.prompt,promt_request.options,chat,user)
+        generator = get_openai_generator(promt_request.prompt,promt_request.options,chat,user,db)
         for event in generator:
+            print(f"data: {event}\n\n")
             yield f"data: {event}\n\n"
     
     return EventSourceResponse(event_generator())
@@ -158,7 +165,7 @@ async def respond_to_message(promt_request: PromptRequest,db: Session = Depends(
 
     # odstreamuju odpoved
     async def event_generator():
-        generator = get_openai_generator(promt_request.prompt,chat_options,chat,user)
+        generator = get_openai_generator(promt_request.prompt,chat_options,chat,user,db)
         for event in generator:
             yield f"data: {event}\n\n"
     

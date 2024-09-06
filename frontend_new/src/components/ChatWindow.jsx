@@ -5,6 +5,8 @@ import axios from 'axios';
 import { AppContext } from '../App';
 import ChatDisplay from './ChatDisplay';
 import ChatOptions from './ChatOptions';
+import ChatInput from './ChatInput';
+import ApiKeyManager from './ApiKeyManager';
 // import './ChatWindow.css'; // Optional: CSS for styling
 const ChatWindow = () => {
   const { accessToken } = useContext(AppContext); // Access the JWT token from context
@@ -14,9 +16,7 @@ const ChatWindow = () => {
   useEffect(() => {
     const fetchChat = async () => {
       try {
-        const url = accessToken 
-          ? 'http://localhost:8000/chat/chat'  // Authenticated endpoint
-          : 'http://localhost:8000/chat/empty_chat'; // Unauthenticated endpoint
+        const url = 'http://localhost:8000/chat/empty_chat'; // Unauthenticated endpoint
         
         const headers = accessToken
           ? { Authorization: `Bearer ${accessToken}` }  // Add Authorization header if authenticated
@@ -34,10 +34,17 @@ const ChatWindow = () => {
     fetchChat(); // Call the fetch function when the component mounts
   }, [accessToken]); // Re-run the effect if accessToken changes
 
+  const handleUserPrompt = (userPrompt) => {
+    // This function receives the user prompt and passes it down to ChatDisplay
+    setConversationEntries((conversationEntries) => [...conversationEntries, { user_prompt: userPrompt, ai_response: '', cost: 0, time: new Date() }]);
+  }
+
   return (
     <div className="chat-window">
-      <ChatDisplay chatData={conversationEntries} /> {/* Pass chat data to ChatDisplay */}
+      <ChatDisplay conversationEntries={conversationEntries} setConversationEntries={setConversationEntries}/> {/* Pass chat data to ChatDisplay */}
       {/* TODO i need to add where the user inputs chat entry and sends the request */}
+      <ChatInput onUserPrompt={handleUserPrompt} /> {/* Pass the handler for user prompt */}
+      <ApiKeyManager/>
       <ChatOptions options={optionsData} /> {/* Pass options data to ChatOptions */}
     </div>
   );

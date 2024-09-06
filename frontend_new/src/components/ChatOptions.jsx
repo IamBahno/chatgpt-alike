@@ -1,9 +1,11 @@
 // src/components/ChatOptions.jsx
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import './ChatOptions.css'; // Optional: CSS for styling
+import { AppContext } from '../App';
 
 const ChatOptions = ({ options }) => {
+  const { handleUpdateOptions } = useContext(AppContext); // Get the setter function from context
   // State variables initialized to null to prevent incorrect renders
   const [useHistory, setUseHistory] = useState(null);
   const [historyType, setHistoryType] = useState('');
@@ -19,17 +21,44 @@ const ChatOptions = ({ options }) => {
       setLlmModel(options.llm_model);
       setNLastTokens(options.n_last_tokens);
       setNBestTokens(options.n_best_tokens);
+
+      handleUpdateOptions(options);
     }
-  }, [options]);
+  }, [options,handleUpdateOptions]);
+
+  // Handler for setting options in context when values change
+  const updateContext = (newOptions) => {
+    handleUpdateOptions(newOptions);
+    };
 
   // Toggle handlers
   const handleUseHistoryToggle = () => {
-    setUseHistory(!useHistory);
+    const updatedUseHistory = !useHistory;
+    setUseHistory(updatedUseHistory);
+
+    // Update context
+    updateContext({
+      use_history: updatedUseHistory,
+      history_type: historyType,
+      llm_model: llmModel,
+      n_last_tokens: nLastTokens,
+      n_best_tokens: nBestTokens,
+    });
   };
 
   const handleHistoryTypeToggle = () => {
-    // Toggle between two predefined options
-    setHistoryType((prevType) => (prevType === 'type1' ? 'type2' : 'type1'));
+    // Toggle between two predefined options (assuming 'type1' and 'type2')
+    const updatedHistoryType = historyType === 'type1' ? 'type2' : 'type1';
+    setHistoryType(updatedHistoryType);
+
+    // Update context
+    updateContext({
+      use_history: useHistory,
+      history_type: updatedHistoryType,
+      llm_model: llmModel,
+      n_last_tokens: nLastTokens,
+      n_best_tokens: nBestTokens,
+    });
   };
 
   // Handle loading state based on `useHistory` being null initially

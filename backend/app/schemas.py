@@ -68,3 +68,7 @@ class LLModel(BaseModel):
 
 class ModelsResponce(BaseModel):
     models : List[LLModel]
+
+class User(BaseModel):
+    username : str
+    is_registered : bool
