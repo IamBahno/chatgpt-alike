@@ -6,13 +6,13 @@ import App, { AppContext } from '../App';
 import axios from 'axios';
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 
-const ChatDisplay = ({ conversationEntries, setConversationEntries }) => {
+const ChatDisplay = ({ conversationEntries, setConversationEntries, toggle_flag }) => {
   const { accessToken } = useContext(AppContext); // Access the JWT token from context
   const { optionsData } = useContext(AppContext);
   const { currentChat } = useContext(AppContext);
-  const { setCurrentChat } = useContext(AppContext);
+  const { handleNewChat } = useContext(AppContext);
   const [eventSource, setEventSource] = useState(null); // State to manage eventSource
-
+  //TODO pokracovat tady
   const handleSendMessage = async (userPrompt,chatId) => {
     // try {
       const enpoint = "http://localhost:8000/chat/message";
@@ -27,7 +27,7 @@ const ChatDisplay = ({ conversationEntries, setConversationEntries }) => {
           },
           body: JSON.stringify({ prompt: userPrompt,
             options: optionsData,
-            chat_id: currentChat ? currentChat.id : null }),
+            chat_id: chatId }),
           onopen(res) {
               if (res.ok && res.status === 200) {
                 console.log("Connection made", res);
@@ -59,18 +59,8 @@ const ChatDisplay = ({ conversationEntries, setConversationEntries }) => {
         },
       );
   setEventSource(newEventSource);
-    //   // Update the chat data with the new conversation entry from the response
-    //   if (response.data) {
-    //     const newEntry = response.data;  // Assume response.data is the new conversation entry
-    //     setConversationEntries((prevEntries) => [...prevEntries, newEntry]);
-    //   }
-    // } catch (error) {
-    //   console.error('Failed to send message:', error);
-    //   // Remove the last conversation entry if the request fails
-    //   setConversationEntries((conversationEntries) => conversationEntries.slice(0, -1));
-    // }
   };
-
+  // TODO z nejakyho duvodu cykly
   const handleSendFirstMessage = async (userPrompt) => {
     // try {
       const enpoint = "http://localhost:8000/chat/first_message";
@@ -85,7 +75,7 @@ const ChatDisplay = ({ conversationEntries, setConversationEntries }) => {
           },
           body: JSON.stringify({ prompt: userPrompt,
             options: optionsData,
-            chat_id: currentChat ? currentChat.id : null }),
+            }),
           onopen(res) {
               if (res.ok && res.status === 200) {
                 console.log("Connection made", res);
@@ -116,10 +106,16 @@ const ChatDisplay = ({ conversationEntries, setConversationEntries }) => {
                 const updatedEntries = [...prevEntries];
                 updatedEntries[updatedEntries.length - 1] = {
                   ...updatedEntries[updatedEntries.length - 1],
-                  cost : parsedData.cost
+                  cost : parsedData.data.cost
                 }
+                return updatedEntries;
               });
-              // vytvorim novej chat a dam ho jako current chat
+              //vytvorim novej chat
+              const newChat = {id : parsedData.data.chat_id,
+                              title : parsedData.data.chat_title};
+              //nastavim jako current
+              handleNewChat(newChat);
+              //TODO pridam ho do listu
             }
           },
           onclose() {
@@ -133,19 +129,27 @@ const ChatDisplay = ({ conversationEntries, setConversationEntries }) => {
   setEventSource(newEventSource);
   };
 
+  // Cleanup function to close the eventSource when the component unmounts
+  useEffect(() => {
+    return () => {
+      if (eventSource) {
+        eventSource.close();
+      }
+    };
+  }, [eventSource]);
+
   // When chatData updates, trigger sending message if the last entry is unsent
   useEffect(() => {
-    console.log("conEntries:"+ conversationEntries);
     const lastEntry = conversationEntries[conversationEntries.length - 1];
     if (lastEntry && lastEntry.ai_response === '') {
       if(conversationEntries.length === 1){
         handleSendFirstMessage(lastEntry.user_prompt);
       }
       else{
-        handleSendMessage(lastEntry.user_prompt, currentChat);
+        handleSendMessage(lastEntry.user_prompt, currentChat.id);
       }
     }
-  }, [conversationEntries]);  
+  }, [toggle_flag]);  
 
     // Check if conversationEntries is missing or empty
   if (!conversationEntries) {
@@ -155,7 +159,6 @@ const ChatDisplay = ({ conversationEntries, setConversationEntries }) => {
     if (conversationEntries.length === 0) {
       return <div>No conversation entries available.</div>; // Show this if there are no entries
     }
-  
   return (
     <div className="chat-display">
       {conversationEntries.map((entry, index) => (

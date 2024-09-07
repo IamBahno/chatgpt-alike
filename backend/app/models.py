@@ -55,7 +55,6 @@ class Message(Base):
 
     conversation_entry_id = Column(Integer, ForeignKey("conversation_entries.id",ondelete="CASCADE"))
 
-# TODO vyresit chybu s  tema dvema messages
 # stores the question the response and the context send with the question
 class ConversationEntry(Base):
     __tablename__ = 'conversation_entries'

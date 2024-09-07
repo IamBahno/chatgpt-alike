@@ -66,6 +66,10 @@ const handleLogout = () => {
     setApiKey(key); // Clear user data from state
     localStorage.setItem('apiKey', apiKey); // Store access token in localStorage
   };
+  const handleNewChat = (chat) => {
+    setCurrentChat(chat); // Clear user data from state
+    localStorage.setItem('currentChat', currentChat); // Store access token in localStorage
+  };
   return (
     <AppContext.Provider
       value={{
@@ -78,7 +82,7 @@ const handleLogout = () => {
         handleLogin,
         handleLogout,
         handleSelectChat,
-        setCurrentChat,
+        handleNewChat,
         handleUpdateOptions,
         handleApiKey,
       }}

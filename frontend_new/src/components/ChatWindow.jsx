@@ -12,6 +12,7 @@ const ChatWindow = () => {
   const { accessToken } = useContext(AppContext); // Access the JWT token from context
   const [conversationEntries, setConversationEntries] = useState([]); // State to store fetched chat data
   const [optionsData, setOptionsData] = useState(null); // State to store fetched options data
+  const [toggleFlag, toggleToggleFlag] = useState(false); // State to store fetched options data
 
   useEffect(() => {
     const fetchChat = async () => {
@@ -37,12 +38,11 @@ const ChatWindow = () => {
   const handleUserPrompt = (userPrompt) => {
     // This function receives the user prompt and passes it down to ChatDisplay
     setConversationEntries((conversationEntries) => [...conversationEntries, { user_prompt: userPrompt, ai_response: '', cost: 0, time: new Date() }]);
+    toggleToggleFlag(!toggleFlag);
   }
-
   return (
     <div className="chat-window">
-      <ChatDisplay conversationEntries={conversationEntries} setConversationEntries={setConversationEntries}/> {/* Pass chat data to ChatDisplay */}
-      {/* TODO i need to add where the user inputs chat entry and sends the request */}
+      <ChatDisplay conversationEntries={conversationEntries} setConversationEntries={setConversationEntries} toggle_flag={toggleFlag}/> {/* Pass chat data to ChatDisplay */}
       <ChatInput onUserPrompt={handleUserPrompt} /> {/* Pass the handler for user prompt */}
       <ApiKeyManager/>
       <ChatOptions options={optionsData} /> {/* Pass options data to ChatOptions */}
