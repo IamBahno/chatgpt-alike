@@ -9,7 +9,7 @@ import ChatInput from './ChatInput';
 import ApiKeyManager from './ApiKeyManager';
 // import './ChatWindow.css'; // Optional: CSS for styling
 const ChatWindow = () => {
-  const { accessToken } = useContext(AppContext); // Access the JWT token from context
+  const { accessToken, currentChat } = useContext(AppContext); // Access the JWT token from context
   const [conversationEntries, setConversationEntries] = useState([]); // State to store fetched chat data
   const [optionsData, setOptionsData] = useState(null); // State to store fetched options data
   const [toggleFlag, toggleToggleFlag] = useState(false); // State to store fetched options data
@@ -34,6 +34,27 @@ const ChatWindow = () => {
 
     fetchChat(); // Call the fetch function when the component mounts
   }, [accessToken]); // Re-run the effect if accessToken changes
+
+  useEffect(() => {
+    const fetchChat = async (chat_id) => {
+      try{
+        const url = `http://localhost:8000/chat/chat?chat_id=${chat_id}`;
+        console.log(accessToken);
+        const headers = accessToken
+        ? { Authorization: `Bearer ${accessToken}` }  // Add Authorization header if authenticated, if user is not authenticated it will fail on backend
+        : {};
+        console.log(headers);
+        const response = await axios.get(url,{ headers });
+        setConversationEntries(response.data.conversation_entries || []); // Set the chat data in state
+        setOptionsData(response.data.options || {}); // Set the options data in state
+      } catch (error){
+        console.error('Failed to fetch chat:', error);
+      }
+    };
+    if(currentChat){
+      fetchChat(currentChat.id)
+    }
+  }, [currentChat])
 
   const handleUserPrompt = (userPrompt) => {
     // This function receives the user prompt and passes it down to ChatDisplay
