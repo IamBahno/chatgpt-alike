@@ -34,7 +34,7 @@ async def get_all_chats(db: Session = Depends(get_db),
                         user: User|None = Depends(get_current_user_or_none)) -> ChatsListResponse:
     if(user == None):
         return ChatsListResponse(chats=[])
-    return ChatsListResponse(chats=[])
+    # return ChatsListResponse(chats=[])
     chats = db.query(Chat).filter(Chat.owner_id == user.id).all()
     chat_schemas = [ChatListItem(id=chat.id, title=chat.title) for chat in chats]
     return ChatsListResponse(chats=chat_schemas)
@@ -105,6 +105,7 @@ def get_openai_generator(prompt: str, options: ChatOption, chat: Chat,user:User,
 # TODO otestovat
 # TODO umazat database transakce jak pudou
 # TODO dodelat generator funkci
+# TODO jmeno chatu
 @router.post("/first_message")
 async def respond_to_first_message(promt_request: FirstPromptRequest,db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     if user.api_key in [None,""]:
@@ -116,7 +117,7 @@ async def respond_to_first_message(promt_request: FirstPromptRequest,db: Session
     user = db.merge(user)
 
     # vytvorim chat model
-    chat = Chat(owner = user)
+    chat = Chat(owner = user,title = "jmenp")
     db.add(chat)
     db.commit()
     db.refresh(chat)

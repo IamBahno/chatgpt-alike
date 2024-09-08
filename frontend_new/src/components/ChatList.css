@@ -1,19 +1,35 @@
 /* src/components/ChatList.css */
 
 .chat-list {
-    padding: 10px;
-  }
-  
-  .chat-item {
-    padding: 10px;
-    margin: 5px 0;
-    background-color: #eaeaea;
-    cursor: pointer;
-    border-radius: 5px;
-    transition: background-color 0.3s;
-  }
-  
-  .chat-item:hover {
-    background-color: #d3d3d3;
-  }
-  
+  padding: 10px;
+  max-height: 80vh; /* Limits the height of the chat list */
+  overflow-y: auto; /* Enables scrolling if the list is too long */
+  background-color: #f5f5f5; /* Light background for contrast */
+  border-radius: 8px; /* Rounded corners for the list container */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for a lifted effect */
+}
+
+.chat-item {
+  padding: 12px 16px; /* Adjusted padding for better spacing */
+  margin: 6px 0; /* Margin between chat items */
+  background-color: #eaeaea; /* Default background color */
+  cursor: pointer; /* Pointer cursor on hover */
+  border-radius: 5px; /* Rounded corners for each chat item */
+  transition: background-color 0.3s, transform 0.1s; /* Smooth transition effects */
+}
+
+.chat-item:hover {
+  background-color: #d3d3d3; /* Slightly darker on hover */
+  transform: translateX(2px); /* Small movement on hover for interaction feedback */
+}
+
+.chat-item.active {
+  background-color: #007bff; /* Highlight color for active chat */
+  color: white; /* White text for contrast on active chat */
+  font-weight: bold; /* Bold text to emphasize active chat */
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3); /* Shadow effect to highlight active chat */
+}
+
+.chat-item.active:hover {
+  background-color: #0056b3; /* Darker blue on hover for active chat */
+}

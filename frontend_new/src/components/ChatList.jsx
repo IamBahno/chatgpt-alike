@@ -6,9 +6,9 @@ import { AppContext } from '../App'; // Import the context
 import './ChatList.css'; // CSS file for styling the chat list
 
 const ChatList = ({ onSelectChat }) => {
-  const { accessToken } = useContext(AppContext); // Access the accessToken from context
-  const [chats, setChats] = useState([]); // State to store fetched chats
-
+  // const { accessToken } = useContext(AppContext); // Access the accessToken from context
+  // const [chats, setChats] = useState([]); // State to store fetched chats
+  const { accessToken, chats, setChats, currentChat } = useContext(AppContext);
   useEffect(() => {
     const fetchChats = async () => {
       try {
@@ -32,13 +32,13 @@ const ChatList = ({ onSelectChat }) => {
   return (
     <div className="chat-list">
       {chats.map((chat) => (
-        <div
-          key={chat.id}
-          className="chat-item"
-          onClick={() => onSelectChat(chat.id)}
+      <div
+        key={chat.id}
+        className={`chat-item ${currentChat && chat.id === currentChat.id ? 'active' : ''}`} // Highlight active chat
+        onClick={() => onSelectChat(chat)}
         >
-          {chat.title}
-        </div>
+        {chat.title}
+      </div>
       ))}
     </div>
   );

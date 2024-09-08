@@ -54,21 +54,18 @@ const handleLogout = () => {
   // Function to select a chat
   const handleSelectChat = (chat) => {
     setCurrentChat(chat);
-    console.log("Aaa");
   };
 
   // Function to update user preferences (API key and model)
   const handleUpdateOptions = (preferences) => {
     setOptionsData(preferences); // Clear user data from state
-    localStorage.setItem('optionsData', preferences); // Store access token in localStorage
   };
   const handleApiKey = (key) => {
     setApiKey(key); // Clear user data from state
     localStorage.setItem('apiKey', apiKey); // Store access token in localStorage
   };
-  const handleNewChat = (chat) => {
-    setCurrentChat(chat); // Clear user data from state
-    localStorage.setItem('currentChat', currentChat); // Store access token in localStorage
+  const addChatToList = (newChat) => {
+    setChats([...chats, newChat]);
   };
   return (
     <AppContext.Provider
@@ -79,12 +76,14 @@ const handleLogout = () => {
         currentChat,
         optionsData,
         apiKey,
+        setCurrentChat,
         handleLogin,
         handleLogout,
         handleSelectChat,
-        handleNewChat,
+        addChatToList,
         handleUpdateOptions,
         handleApiKey,
+        setChats,
       }}
     >
       <Router>

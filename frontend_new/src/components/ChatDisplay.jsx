@@ -6,11 +6,9 @@ import App, { AppContext } from '../App';
 import axios from 'axios';
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 
+// TODO should display messeges of old chat 
 const ChatDisplay = ({ conversationEntries, setConversationEntries, toggle_flag }) => {
-  const { accessToken } = useContext(AppContext); // Access the JWT token from context
-  const { optionsData } = useContext(AppContext);
-  const { currentChat } = useContext(AppContext);
-  const { handleNewChat } = useContext(AppContext);
+  const { accessToken, optionsData, currentChat, setCurrentChat, addChatToList } = useContext(AppContext); 
   const [eventSource, setEventSource] = useState(null); // State to manage eventSource
 
   const handleSendMessage = async (userPrompt,chatId) => {
@@ -123,9 +121,10 @@ const ChatDisplay = ({ conversationEntries, setConversationEntries, toggle_flag 
               //vytvorim novej chat
               const newChat = {id : parsedData.data.chat_id,
                               title : parsedData.data.chat_title};
-              //nastavim jako current
-              handleNewChat(newChat);
-              //TODO pridam ho do listu
+              //add him to the chat list
+              addChatToList(newChat);
+              //nastavim jako current (set current chat)
+              setCurrentChat(newChat);
             }
           },
           onclose() {
