@@ -1,11 +1,12 @@
+import tiktoken
+import os
+import json
 from fastapi import FastAPI, HTTPException, APIRouter, Depends
 from sqlalchemy.orm import Session
 from fastapi.responses import StreamingResponse
 from sse_starlette.sse import EventSourceResponse
 from openai import OpenAI
 from dotenv import load_dotenv
-import tiktoken
-import os
 from .schemas import ChatRequest,ChatResponse,ChatsListResponse, ChatListItem, Options, ChatResponse, PromptRequest, FirstPromptRequest, ModelsResponce,LLModel
 from .database import get_db
 from .models import User, Chat, ChatOption, ConversationEntry
@@ -90,13 +91,13 @@ def get_openai_generator(prompt: str, options: ChatOption, chat: Chat,user:User,
         if event.choices[0].delta.content:
             current_response = event.choices[0].delta.content
             full_response += current_response  # Append to full response
-            yield {"type": "message", "data": current_response}  # Stream each piece of content
+            yield json.dumps({"type": "message", "data": current_response})  # Stream each piece of content
 
     # After streaming all data, send the final summary
     tokens_generated_count = len(encoding.encode(full_response))
     input_token_count = len(encoding.encode(prompt))
     cost = 0.0  # Example cost calculation
-    yield {"type": "final", "data": {"cost": cost, "chat_id": chat.id, "chat_title":chat.title}}
+    yield json.dumps({"type": "final", "data": {"cost": cost, "chat_id": chat.id, "chat_title":chat.title}})
 
     # Perform post-processing, such as saving to the database
     save_chat_entry(chat=Chat,user_prompt=prompt,user_prompt_tokens=input_token_count,ai_response=full_response,ai_response_tokens=tokens_generated_count,cost=cost)  # Save after streaming
@@ -158,15 +159,14 @@ async def respond_to_message(promt_request: PromptRequest,db: Session = Depends(
         raise
 
     #vytahnu si chat
-    chat = db.query(Chat).filter(Chat.id == promt_request.id).first()
-
+    chat = db.query(Chat).filter(Chat.id == promt_request.chat_id).first()
     # pokud zmeni chat options tak je prepisu a ulozim
     chat_options = check_update_options(db, promt_request.options,chat.option)
-
     # odstreamuju odpoved
     async def event_generator():
         generator = get_openai_generator(promt_request.prompt,chat_options,chat,user,db)
         for event in generator:
+            print(f"data: {event}\n\n")
             yield f"data: {event}\n\n"
     
     return EventSourceResponse(event_generator())

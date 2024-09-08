@@ -12,7 +12,7 @@ const ChatDisplay = ({ conversationEntries, setConversationEntries, toggle_flag 
   const { currentChat } = useContext(AppContext);
   const { handleNewChat } = useContext(AppContext);
   const [eventSource, setEventSource] = useState(null); // State to manage eventSource
-  //TODO pokracovat tady
+
   const handleSendMessage = async (userPrompt,chatId) => {
     // try {
       const enpoint = "http://localhost:8000/chat/message";
@@ -37,18 +37,30 @@ const ChatDisplay = ({ conversationEntries, setConversationEntries, toggle_flag 
           },
           onmessage(event) {
             console.log("Received event data:", event.data);
-            // setCurrentChat((prevData) => prevData);
-            // Update the data as a single string
-            // setData((prevData) => prevData + event.data);
-            // console.log(currentChat)
+            let jsonPart = event.data.split("data: ")[1]
 
-            // TODO
-            // bude updatovat chatentries
-            // setConversationEntries((prevEntries) => [...prevEntries, newEntry]);
-
-
-            // prijmu data k chat entries
-            // nakonec dostanu chat id a nastavim current chat
+            // Parse the JSON part
+            const parsedData = JSON.parse(jsonPart);
+            if (parsedData.type == "message"){
+              setConversationEntries((prevEntries) => {
+                const updatedEntries = [...prevEntries];
+                const lastEntry = updatedEntries[updatedEntries.length - 1];
+                lastEntry.ai_response += parsedData.data;
+                return updatedEntries;
+              });
+            }            
+            // nakonec prijmu data k chat entries a vytvorim a nastovim novy chat
+            else if (parsedData.type == "final"){
+              // pridam  cost, to musim udelat i kdyz to neni first message
+              setConversationEntries((prevEntries) => {
+                const updatedEntries = [...prevEntries];
+                updatedEntries[updatedEntries.length - 1] = {
+                  ...updatedEntries[updatedEntries.length - 1],
+                  cost : parsedData.data.cost
+                }
+                return updatedEntries;
+              });
+            }
           },
           onclose() {
             console.log("Connection closed by the server");
@@ -60,9 +72,8 @@ const ChatDisplay = ({ conversationEntries, setConversationEntries, toggle_flag 
       );
   setEventSource(newEventSource);
   };
-  // TODO z nejakyho duvodu cykly
+  // TODO pridat do listu
   const handleSendFirstMessage = async (userPrompt) => {
-    // try {
       const enpoint = "http://localhost:8000/chat/first_message";
       // Make a POST request to send the user's prompt to the backend
       // const response = await axios.post(enpoint, 
@@ -89,7 +100,6 @@ const ChatDisplay = ({ conversationEntries, setConversationEntries, toggle_flag 
             let jsonPart = event.data.split("data: ")[1].replace(/'/g, '"');
 
             // Parse the JSON part
-            jsonPart = jsonPart.replace(/None/g, 'null');
             const parsedData = JSON.parse(jsonPart);
             if (parsedData.type == "message"){
               setConversationEntries((prevEntries) => {
