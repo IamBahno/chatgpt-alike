@@ -48,6 +48,7 @@ const ApiKeyManager = () => {
     } catch (error) {
       console.error('Error saving API key:', error);
       // Handle error (e.g., show an error message or notify the user)
+      //TODO add some notification
     }
   };
 

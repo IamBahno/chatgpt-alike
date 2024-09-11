@@ -55,6 +55,7 @@ async def get_chats(chat_request: ChatRequest = Depends(),db: Session = Depends(
     chat_schema = chat_model_to_chat_schema(chat_model)
     return chat_schema
 
+#TODO dodelat, tady pokracovat, continue
 #TODO komplet
 def save_chat_entry(chat : Chat,user_prompt: str, user_prompt_tokens:int, ai_response: str, ai_response_tokens: int, cost: float):
     # Implement your database save logic here
@@ -106,6 +107,7 @@ def get_openai_generator(prompt: str, options: ChatOption, chat: Chat,user:User,
 # TODO umazat database transakce jak pudou
 # TODO dodelat generator funkci
 # TODO jmeno chatu
+# TODO dodelat handling kdyz to selze
 @router.post("/first_message")
 async def respond_to_first_message(promt_request: FirstPromptRequest,db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     if user.api_key in [None,""]:
@@ -153,6 +155,7 @@ def check_update_options(db, options_schema : Options, options_model: ChatOption
 
     return options_model
 
+# TODO dodelat handling kdyz to selze
 @router.post("/message")
 async def respond_to_message(promt_request: PromptRequest,db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     if user.api_key in [None,""]:

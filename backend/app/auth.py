@@ -11,6 +11,8 @@ from .models import User as UserModel
 from sqlalchemy.exc import NoResultFound,IntegrityError 
 import bcrypt
 import os
+from openai import OpenAI, AuthenticationError
+from fastapi.responses import JSONResponse
 
 router = APIRouter()
 
@@ -186,9 +188,25 @@ def hash_password(password: str) -> str:
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
     return hashed_password.decode('utf-8')  # Convert back to string for storage
 
+def validate_openai_key(api_key):
+    try:
+        # Making the smallest, cheapest call
+        client = OpenAI(api_key = api_key)
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": "Hi"}],
+            temperature=0.0,
+            max_tokens = 10,
+        )
+        print("API key is valid.")
+        return True
+    except AuthenticationError as e:
+        print(f"Key is not valid: {e}")
+        return False
+
 @router.post("/users/me")
 async def me(user: UserModel = Depends(get_current_user)):
-    return User(username = user.username, is_registered = user.is_registered)
+    return User(username = user.username,api_key = user.api_key, is_registered = user.is_registered)
 
 
 @router.post("/login", response_model=Token)
@@ -264,6 +282,15 @@ async def refresh_token(refresh_token: str, db: Session = Depends(get_db)):
 @router.post("/api_key",response_model=Token)
 async def set_api_key(set_key_request:SetKeyRequest,db: Session = Depends(get_db),
                       current_user: UserModel = Depends(get_current_user_or_create_one)):
+    if(not validate_openai_key(set_key_request.api_key)):
+        # Return a custom JSON response, bypassing the response_model
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content={
+                "status": "error",
+                "message": "Invalid API key provided. Please check your key and try again."
+            }
+        )
     current_user.api_key = set_key_request.api_key
     db.add(current_user)
     db.commit()

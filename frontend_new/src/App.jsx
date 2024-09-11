@@ -19,10 +19,9 @@ const App = () => {
   const [apiKey, setApiKey] = useState(localStorage.getItem('apiKey') || '');
 
   // Effect to fetch user data if a JWT token exists
-  // TODO on backend
   useEffect(() => {
     if (accessToken) {
-      axios.get('/api/users/me', {
+      axios.get('/auth/users/me', {
         headers: {
           Authorization: `Bearer ${accessToken}`
         }
