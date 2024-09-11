@@ -204,7 +204,7 @@ def validate_openai_key(api_key):
         print(f"Key is not valid: {e}")
         return False
 
-@router.post("/users/me")
+@router.get("/users/me", response_model=User)
 async def me(user: UserModel = Depends(get_current_user)):
     return User(username = user.username,api_key = user.api_key, is_registered = user.is_registered)
 

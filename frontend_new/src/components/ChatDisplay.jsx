@@ -6,7 +6,7 @@ import App, { AppContext } from '../App';
 import axios from 'axios';
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 
-// TODO should display messeges of old chat 
+// TODO nesmim netchat odeslat bez valid api key
 const ChatDisplay = ({ conversationEntries, setConversationEntries, toggle_flag }) => {
   const { accessToken, optionsData, currentChat, setCurrentChat, addChatToList } = useContext(AppContext); 
   const [eventSource, setEventSource] = useState(null); // State to manage eventSource

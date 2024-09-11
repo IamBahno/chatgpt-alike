@@ -21,14 +21,14 @@ const App = () => {
   // Effect to fetch user data if a JWT token exists
   useEffect(() => {
     if (accessToken) {
-      axios.get('/auth/users/me', {
+      axios.get('http://localhost:8000/auth/users/me', {
         headers: {
           Authorization: `Bearer ${accessToken}`
         }
       })
-      .then(response => setCurrentUser(response.data))
+      .then(response => {setCurrentUser(response.data); console.log("response");console.log(response)})
       .catch(() => {
-        setJwtToken('');
+        setAccessToken('');
         localStorage.removeItem('accessToken');
       });
     }

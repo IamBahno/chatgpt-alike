@@ -72,4 +72,4 @@ class ModelsResponce(BaseModel):
 class User(BaseModel):
     username : str
     is_registered : bool
-    api_key : str
+    api_key : str|None

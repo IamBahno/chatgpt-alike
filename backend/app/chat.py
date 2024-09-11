@@ -26,7 +26,6 @@ DEFAULT_OPTIONS = {
     }
 
 
-#TODO oddelat zarazku
 #TODO otestovat, kdyz ma user token
 #TODO otestovat, kdyz ma user token a ma ulozeny chaty
 @router.get("/chats")
@@ -34,7 +33,7 @@ async def get_all_chats(db: Session = Depends(get_db),
                         user: User|None = Depends(get_current_user_or_none)) -> ChatsListResponse:
     if(user == None):
         return ChatsListResponse(chats=[])
-    # return ChatsListResponse(chats=[])
+
     chats = db.query(Chat).filter(Chat.owner_id == user.id).all()
     chat_schemas = [ChatListItem(id=chat.id, title=chat.title) for chat in chats]
     return ChatsListResponse(chats=chat_schemas)

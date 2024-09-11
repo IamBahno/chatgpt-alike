@@ -45,7 +45,7 @@ const Header = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ "username": username, "password": password, "password_again" : password}),
       });
       if (response.ok) {
         const data = await response.json();
@@ -59,7 +59,8 @@ const Header = () => {
       alert('An error occurred while trying to register.');
     }
   };
-
+  console.log("currentUser");
+  console.log(currentUser);
   return (
     <header className="header">
       <div className="logo">
