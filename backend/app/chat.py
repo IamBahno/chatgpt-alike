@@ -9,7 +9,7 @@ from openai import OpenAI
 from dotenv import load_dotenv
 from .schemas import ChatRequest,ChatResponse,ChatsListResponse, ChatListItem, Options, ChatResponse, PromptRequest, FirstPromptRequest, ModelsResponce,LLModel
 from .database import get_db
-from .models import User, Chat, ChatOption, ConversationEntry
+from .models import User, Chat, ChatOption, ConversationEntry, Message
 from .auth import get_current_user_or_none, get_current_user
 from .converters import chat_model_to_chat_schema
 
@@ -55,28 +55,37 @@ async def get_chats(chat_request: ChatRequest = Depends(),db: Session = Depends(
     chat_schema = chat_model_to_chat_schema(chat_model)
     return chat_schema
 
-#TODO dodelat, tady pokracovat, continue
-#TODO komplet
-def save_chat_entry(chat : Chat,user_prompt: str, user_prompt_tokens:int, ai_response: str, ai_response_tokens: int, cost: float):
-    # Implement your database save logic here
-    # For example, create a new conversation entry or message record
-    db_session = Session()  # Get your DB session here
+#TODO vektory
+def save_chat_entry(chat : Chat,user_prompt: str, user_prompt_tokens:int, ai_response: str, ai_response_tokens: int, cost: float, db : Session):
     try:
-        # new_entry = ConversationEntry(text=full_response, tokens=token_count, cost=cost)
-        print("ukldam dummy do db")
-        new_entry = ConversationEntry()
-        db_session.add(new_entry)
-        db_session.commit()
+        user_message = Message(
+            text = user_prompt,
+            tokens = user_prompt_tokens
+        )
+        ai_message = Message(
+            text = ai_response,
+            tokens = ai_response_tokens
+        )
+        conversation_entry = ConversationEntry(
+            tokens = user_prompt_tokens + ai_response_tokens,
+            cost = cost,
+            user_prompt = user_message,
+            ai_response = ai_message,
+            chat = chat,
+        )
+        db.add(conversation_entry)
+        db.commit()
+        print("ukldam entry do db")
     except Exception as e:
-        db_session.rollback()
+        db.rollback()
         print(f"Error saving to DB: {e}")
-    finally:
-        db_session.close()
 
 # mel by fungovat pro prvni request i pro nasledujici
 # #TODO pridat ten historickej context
 # TODO pridat count vypocet
 # TODO samozrejme otestovat
+# TODO save entry
+# TODO vectory
 def get_openai_generator(prompt: str, options: ChatOption, chat: Chat,user:User,db: Session):
     client = OpenAI(api_key = user.api_key)
     openai_stream = client.chat.completions.create(
@@ -101,7 +110,13 @@ def get_openai_generator(prompt: str, options: ChatOption, chat: Chat,user:User,
     yield json.dumps({"type": "final", "data": {"cost": cost, "chat_id": chat.id, "chat_title":chat.title}})
 
     # Perform post-processing, such as saving to the database
-    save_chat_entry(chat=Chat,user_prompt=prompt,user_prompt_tokens=input_token_count,ai_response=full_response,ai_response_tokens=tokens_generated_count,cost=cost)  # Save after streaming
+    save_chat_entry(chat=chat,
+                    user_prompt=prompt,
+                    user_prompt_tokens=input_token_count,
+                    ai_response=full_response,
+                    ai_response_tokens=tokens_generated_count,
+                    cost=cost,
+                    db = db)  # Save after streaming
 
 # TODO otestovat
 # TODO umazat database transakce jak pudou
