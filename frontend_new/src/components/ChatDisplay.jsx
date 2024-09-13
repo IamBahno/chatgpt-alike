@@ -159,6 +159,7 @@ const ChatDisplay = ({ conversationEntries, setConversationEntries, toggle_flag 
       }
     }
   }, [toggle_flag]);  
+  // TODO udelat neco jinyho nez toggle flag, ta puvodni chyba byle jinde
 
     // Check if conversationEntries is missing or empty
   if (!conversationEntries) {

@@ -46,8 +46,9 @@ const ApiKeyManager = () => {
         // Optionally handle non-200 responses here
       }
     } catch (error) {
+      //the key is not valid
       console.error('Error saving API key:', error);
-      // Handle error (e.g., show an error message or notify the user)
+      handleApiKey(undefined); // Update context with the new API key
       //TODO add some notification
     }
   };

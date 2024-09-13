@@ -9,7 +9,7 @@ import ChatInput from './ChatInput';
 import ApiKeyManager from './ApiKeyManager';
 // import './ChatWindow.css'; // Optional: CSS for styling
 const ChatWindow = () => {
-  const { accessToken, currentChat } = useContext(AppContext); // Access the JWT token from context
+  const { accessToken, currentChat, apiKey } = useContext(AppContext); // Access the JWT token from context
   const [conversationEntries, setConversationEntries] = useState([]); // State to store fetched chat data
   const [optionsData, setOptionsData] = useState(null); // State to store fetched options data
   const [toggleFlag, toggleToggleFlag] = useState(false); // State to store fetched options data
@@ -57,9 +57,17 @@ const ChatWindow = () => {
   }, [currentChat])
 
   const handleUserPrompt = (userPrompt) => {
-    // This function receives the user prompt and passes it down to ChatDisplay
-    setConversationEntries((conversationEntries) => [...conversationEntries, { user_prompt: userPrompt, ai_response: '', cost: 0, time: new Date() }]);
-    toggleToggleFlag(!toggleFlag);
+    // cheks if there is valid api_key
+    if(apiKey){
+      // This function receives the user prompt and passes it down to ChatDisplay
+      setConversationEntries((conversationEntries) => [...conversationEntries, { user_prompt: userPrompt, ai_response: '', cost: 0, time: new Date() }]);
+      toggleToggleFlag(!toggleFlag);  
+    }
+    else{
+      // TODO pridat popup ze nelze odeslat bez validniho api_key
+      console.log("nelze odeslat bez valid api key")
+    }
+
   }
   return (
     <div className="chat-window">

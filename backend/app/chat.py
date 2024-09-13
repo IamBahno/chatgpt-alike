@@ -26,8 +26,6 @@ DEFAULT_OPTIONS = {
     }
 
 
-#TODO otestovat, kdyz ma user token
-#TODO otestovat, kdyz ma user token a ma ulozeny chaty
 @router.get("/chats")
 async def get_all_chats(db: Session = Depends(get_db),
                         user: User|None = Depends(get_current_user_or_none)) -> ChatsListResponse:

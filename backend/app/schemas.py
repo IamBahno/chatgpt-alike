@@ -70,6 +70,6 @@ class ModelsResponce(BaseModel):
     models : List[LLModel]
 
 class User(BaseModel):
-    username : str
+    username : str|None
     is_registered : bool
     api_key : str|None

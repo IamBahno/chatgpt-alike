@@ -12,7 +12,7 @@ class User(Base):
     username = Column(String, unique = True)
     hashed_password = Column(String)
     api_key = Column(String, unique = True)
-    is_registered = Column(Boolean)
+    is_registered = Column(Boolean, default=False)
 
     chats = relationship("Chat", back_populates="owner")
 
