@@ -26,13 +26,40 @@ const App = () => {
           Authorization: `Bearer ${accessToken}`
         }
       })
-      .then(response => {setCurrentUser(response.data); console.log("response");console.log(response)})
+      .then(response => {setCurrentUser(response.data); setApiKey(response.data.api_key);console.log("response");console.log(response)})
       .catch(() => {
         setAccessToken('');
         localStorage.removeItem('accessToken');
       });
     }
   }, [accessToken]);
+
+  useEffect(() => {
+    const refreshAccessToken = async () =>{
+      //if the user has reftesh token but not access tokken
+      if (refreshToken && !accessToken){
+        try {
+          const response = await fetch('http://localhost:8000/auth/refresh', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ "refresh_token" : refreshToken }),
+          });
+          if (response.ok) {
+            const data = await response.json();
+            handleLogin(data.access_token,data.refresh_token);
+          } else {
+            alert('Login failed. Please check your credentials.');
+          }
+        } catch (error) {
+          console.error('coulnd refresh token:', error);
+        }
+      }
+    };
+    // Call the async function
+    refreshAccessToken();
+  }, []);
 
 // Function to handle login, setting JWT tokens and fetching user data
 const handleLogin = (accessToken, refreshToken) => {
@@ -61,7 +88,6 @@ const handleLogout = () => {
   };
   const handleApiKey = (key) => {
     setApiKey(key); // Clear user data from state
-    localStorage.setItem('apiKey', apiKey); // Store access token in localStorage
   };
   const addChatToList = (newChat) => {
     setChats([...chats, newChat]);

@@ -5,7 +5,7 @@ from passlib.context import CryptContext
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
 from .database import get_db
-from .schemas import GeneralResponse, SetKeyRequest, RegisterRequest, LoginRequest, User
+from .schemas import GeneralResponse, SetKeyRequest, RegisterRequest, LoginRequest, User, RefreshRequest
 from sqlalchemy.orm import Session
 from .models import User as UserModel
 from sqlalchemy.exc import NoResultFound,IntegrityError 
@@ -253,9 +253,9 @@ async def register(register_data: RegisterRequest,db: Session = Depends(get_db))
 
     
 @router.post("/refresh", response_model=Token)
-async def refresh_token(refresh_token: str, db: Session = Depends(get_db)):
+async def refresh_token(refresh_request: RefreshRequest, db: Session = Depends(get_db)):
     try:
-        payload = jwt.decode(refresh_token, JWT_REFRESH_SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(refresh_request.refresh_token, JWT_REFRESH_SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         user_id: str = payload.get("user_id")
         if username is None or user_id is None:
@@ -266,9 +266,9 @@ async def refresh_token(refresh_token: str, db: Session = Depends(get_db)):
         
         # Generate new access token
         access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-        access_token = create_access_token(data={"sub": user.username, "user_id": user.id}, expires_delta=access_token_expires)
-        new_refresh_token = create_refresh_token(data={"sub": user.username, "user_id": user.id})
+        access_token = create_access_token(data={"sub": user.username if user.username else "" , "user_id": user.id}, expires_delta=access_token_expires)
 
+        new_refresh_token = create_refresh_token(data={"sub": user.username, "user_id": user.id})
         return {"access_token": access_token, "refresh_token": new_refresh_token, "token_type": "bearer"}
     except JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate refresh token.")

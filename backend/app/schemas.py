@@ -73,3 +73,6 @@ class User(BaseModel):
     username : str|None
     is_registered : bool
     api_key : str|None
+
+class RefreshRequest(BaseModel):
+    refresh_token : str

@@ -45,7 +45,6 @@ async def get_empty_chat(db: Session = Depends(get_db)) -> ChatResponse:
     chat = ChatResponse(options=options,conversation_entries=[])
     return chat
 
-#TODO otestovat (vubec jsem netestoval)
 @router.get("/chat")
 async def get_chats(chat_request: ChatRequest = Depends(),db: Session = Depends(get_db),user: User = Depends(get_current_user)) -> ChatResponse:
     chat_model = db.query(Chat).filter(Chat.id == chat_request.chat_id).one()
