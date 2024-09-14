@@ -6,8 +6,7 @@ import App, { AppContext } from '../App';
 import axios from 'axios';
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 
-// TODO nesmim netchat odeslat bez valid api key
-const ChatDisplay = ({ conversationEntries, setConversationEntries, toggle_flag }) => {
+const ChatDisplay = ({ conversationEntries, setConversationEntries, genResponse }) => {
   const { accessToken, optionsData, currentChat, setCurrentChat, addChatToList } = useContext(AppContext); 
   const [eventSource, setEventSource] = useState(null); // State to manage eventSource
 
@@ -158,8 +157,8 @@ const ChatDisplay = ({ conversationEntries, setConversationEntries, toggle_flag 
         handleSendMessage(lastEntry.user_prompt, currentChat.id);
       }
     }
-  }, [toggle_flag]);  
-  // TODO udelat neco jinyho nez toggle flag, ta puvodni chyba byle jinde
+  }, [genResponse]);  
+
 
     // Check if conversationEntries is missing or empty
   if (!conversationEntries) {

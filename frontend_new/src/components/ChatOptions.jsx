@@ -4,6 +4,8 @@ import React, { useState, useEffect, useContext } from 'react';
 import './ChatOptions.css'; // Optional: CSS for styling
 import { AppContext } from '../App';
 
+//TODO dodelat, toggle neni toggle, input field neni input field
+//TODO dat na vyber z fetchnutych mdoelu a loadnout ty data
 const ChatOptions = ({ options }) => {
   const { handleUpdateOptions } = useContext(AppContext); // Get the setter function from context
   // State variables initialized to null to prevent incorrect renders
@@ -12,6 +14,27 @@ const ChatOptions = ({ options }) => {
   const [llmModel, setLlmModel] = useState('');
   const [nLastTokens, setNLastTokens] = useState(0);
   const [nBestTokens, setNBestTokens] = useState(0);
+  const [models, setModels] = useState([]);
+
+  useEffect(() => {
+    const fetchModels = async () => {
+      try {
+        const response = await fetch('http://localhost:8000/chat/models'); // Replace with your actual endpoint
+        if (response.ok) {
+          const data = await response.json();
+          setModels(data.models);
+          print("chaha");
+          console.log(data.models);
+        } else {
+          console.error("Failed to fetch models:", response.status);
+        }
+      } catch (error) {
+        console.error("Error fetching models:", error);
+      }
+    };
+  
+    fetchModels();
+  }, []); // Empty dependency array so it runs once on component mount
 
   // Update state when options prop changes
   useEffect(() => {

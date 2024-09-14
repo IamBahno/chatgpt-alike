@@ -79,8 +79,6 @@ def save_chat_entry(chat : Chat,user_prompt: str, user_prompt_tokens:int, ai_res
 # mel by fungovat pro prvni request i pro nasledujici
 # #TODO pridat ten historickej context
 # TODO pridat count vypocet
-# TODO samozrejme otestovat
-# TODO save entry
 # TODO vectory
 def get_openai_generator(prompt: str, options: ChatOption, chat: Chat,user:User,db: Session):
     client = OpenAI(api_key = user.api_key)
@@ -114,9 +112,7 @@ def get_openai_generator(prompt: str, options: ChatOption, chat: Chat,user:User,
                     cost=cost,
                     db = db)  # Save after streaming
 
-# TODO otestovat
 # TODO umazat database transakce jak pudou
-# TODO dodelat generator funkci
 # TODO jmeno chatu
 # TODO dodelat handling kdyz to selze
 @router.post("/first_message")
@@ -126,7 +122,6 @@ async def respond_to_first_message(promt_request: FirstPromptRequest,db: Session
         raise
     
     # dostanu user model
-    # user = db.query(User).filter(User.id == user.id).first()
     user = db.merge(user)
 
     # vytvorim chat model
@@ -189,7 +184,7 @@ async def respond_to_message(promt_request: PromptRequest,db: Session = Depends(
 # TODO
 @router.get("/models")
 async def models() -> ModelsResponce:
-    model1 = LLModel(name="gpt-3",displayName="GPT-3",context_limit=4000,input_tokens_price = 0.5, output_tokens_price = 0.4 )
-    model2 = LLModel(name="gpt-4o",displayName="GPT-4o",context_limit=8000,input_tokens_price = 0.5, output_tokens_price = 0.4 )
+    model1 = LLModel(name="gpt-3.5-turbo",displayName="GPT-3",context_limit=4000,input_tokens_price = 0.5, output_tokens_price = 0.4 )
+    model2 = LLModel(name="gpt-4",displayName="GPT-4",context_limit=8000,input_tokens_price = 0.5, output_tokens_price = 0.4 )
     model3 = LLModel(name="gpt-davici3",displayName="Davici-3",context_limit=4000,input_tokens_price = 0.5, output_tokens_price = 0.4 )
     return ModelsResponce(models = [model1,model2,model3])

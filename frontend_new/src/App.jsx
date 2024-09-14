@@ -4,7 +4,7 @@ import Header from './components/Header';
 import MainLayout from './components/MainLayout';
 import Footer from './components/Footer';
 import axios from 'axios';
-// TODO ukazuje to ze je nekdo registrovanej potom co odeslu klic
+
 // Context to share JWT token and user data across the app
 export const AppContext = createContext();
 

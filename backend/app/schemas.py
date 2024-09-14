@@ -61,7 +61,7 @@ class GeneralResponse(BaseModel):
 class LLModel(BaseModel):
     name : str
     displayName : str
-    context_limt : int
+    context_limit : int
     input_tokens_price : float
     output_tokens_price : float
 
