@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import './ChatOptions.css'; // Optional: CSS for styling
+import * as Constants from '../constants';
 
 //TODO kdyz use history false, nemela by byt moznost menit nastaveni historie
 //TODO history type
@@ -55,18 +56,9 @@ const ChatOptions = ({ options, setOptionsData }) => {
   };
 
   const handleHistoryTypeToggle = () => {
-    // Toggle between two predefined options (assuming 'type1' and 'type2')
-    const updatedHistoryType = historyType === 'type1' ? 'type2' : 'type1';
+    // Toggle between two predefined options
+    const updatedHistoryType = historyType === Constants.N_BEST_TOKENS_TYPE ? Constants.N_LAST_TOKENS_TYPE : Constants.N_BEST_TOKENS_TYPE;
     setHistoryType(updatedHistoryType);
-
-    // Update context
-    setOptionsData({
-      use_history: useHistory,
-      history_type: updatedHistoryType,
-      llm_model: llmModel,
-      n_last_tokens: nLastTokens,
-      n_best_tokens: nBestTokens,
-    });
   };
 
   const handleModelChange = (event) => {
@@ -134,7 +126,7 @@ const ChatOptions = ({ options, setOptionsData }) => {
             className={`history-type-toggle ${historyType}`}
             onClick={handleHistoryTypeToggle}
           >
-            {historyType === 'type1' ? 'Type 1' : 'Type 2'}
+            {historyType === Constants.N_BEST_TOKENS_TYPE ? 'Best tokens' : 'Last tokens'}
           </button>
         </div>
       </div>

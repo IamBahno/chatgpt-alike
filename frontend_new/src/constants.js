@@ -1,0 +1,2 @@
+export const N_LAST_TOKENS_TYPE = "N_LAST_TOKENS"
+export const N_BEST_TOKENS_TYPE = "N_BEST_TOKENS"

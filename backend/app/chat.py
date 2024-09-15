@@ -16,11 +16,13 @@ from .converters import chat_model_to_chat_schema
 router = APIRouter()
 load_dotenv()
 
+N_BEST_TOKENS_TYPE = "N_BEST_TOKENS"
+N_LAST_TOKENS_TYPE = "N_LAST_TOKENS"
 
 DEFAULT_OPTIONS = {
     "use_history":True,
     "llm_model":"gpt-3.5-turbo",
-    "history_type":"last_tokens",  #predefined string
+    "history_type":N_BEST_TOKENS_TYPE,  #predefined string
     "n_last_tokens":2000, # for the n last tokens
     "n_best_tokens":2000 # for the n best responses
     }
