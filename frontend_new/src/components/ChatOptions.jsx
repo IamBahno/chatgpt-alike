@@ -1,13 +1,11 @@
 // src/components/ChatOptions.jsx
 
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import './ChatOptions.css'; // Optional: CSS for styling
-import { AppContext } from '../App';
 
-//TODO dodelat, toggle neni toggle, input field neni input field
-//TODO dat na vyber z fetchnutych mdoelu a loadnout ty data
-const ChatOptions = ({ options }) => {
-  const { handleUpdateOptions } = useContext(AppContext); // Get the setter function from context
+//TODO kdyz use history false, nemela by byt moznost menit nastaveni historie
+//TODO history type
+const ChatOptions = ({ options, setOptionsData }) => {
   // State variables initialized to null to prevent incorrect renders
   const [useHistory, setUseHistory] = useState(null);
   const [historyType, setHistoryType] = useState('');
@@ -23,7 +21,6 @@ const ChatOptions = ({ options }) => {
         if (response.ok) {
           const data = await response.json();
           setModels(data.models);
-          print("chaha");
           console.log(data.models);
         } else {
           console.error("Failed to fetch models:", response.status);
@@ -44,29 +41,17 @@ const ChatOptions = ({ options }) => {
       setLlmModel(options.llm_model);
       setNLastTokens(options.n_last_tokens);
       setNBestTokens(options.n_best_tokens);
-
-      handleUpdateOptions(options);
     }
-  }, [options,handleUpdateOptions]);
+  }, [options]);
 
-  // Handler for setting options in context when values change
-  const updateContext = (newOptions) => {
-    handleUpdateOptions(newOptions);
-    };
+  useEffect(() => {
+    updateOptions();
+  }, [llmModel, useHistory, historyType, nLastTokens, nBestTokens]);
 
   // Toggle handlers
   const handleUseHistoryToggle = () => {
     const updatedUseHistory = !useHistory;
     setUseHistory(updatedUseHistory);
-
-    // Update context
-    updateContext({
-      use_history: updatedUseHistory,
-      history_type: historyType,
-      llm_model: llmModel,
-      n_last_tokens: nLastTokens,
-      n_best_tokens: nBestTokens,
-    });
   };
 
   const handleHistoryTypeToggle = () => {
@@ -75,7 +60,7 @@ const ChatOptions = ({ options }) => {
     setHistoryType(updatedHistoryType);
 
     // Update context
-    updateContext({
+    setOptionsData({
       use_history: useHistory,
       history_type: updatedHistoryType,
       llm_model: llmModel,
@@ -84,6 +69,27 @@ const ChatOptions = ({ options }) => {
     });
   };
 
+  const handleModelChange = (event) => {
+    setLlmModel(event.target.value);
+  };
+
+  const handleNLastSliderChange = (event) => {
+    setNLastTokens(event.target.value);
+  };
+
+  const handleNBestSliderChange = (event) => {
+    setNBestTokens(event.target.value);
+  };
+  const updateOptions = () => {
+    setOptionsData({
+      use_history: useHistory,
+      history_type: historyType,
+      llm_model: llmModel,
+      n_last_tokens: nLastTokens,
+      n_best_tokens: nBestTokens,
+    });
+  }
+
   // Handle loading state based on `useHistory` being null initially
   if (useHistory === null) {
     return <div>Loading options...</div>; // Show loading until state updates from options prop
@@ -91,6 +97,20 @@ const ChatOptions = ({ options }) => {
 
   return (
     <div className="chat-options">
+
+      <div className="option">
+        <label htmlFor="ai-model">Select AI Model:</label>
+        <select id="ai-model" value={llmModel} onChange={handleModelChange}>
+          <option value="" disabled>Select a model</option>
+          {models.map((model) => (
+            <option key={model.name} value={model.name}>
+              {model.displayName} {/* Display a user-friendly name */}
+            </option>
+          ))}
+        </select>
+      </div>
+
+
       <div className="option">
         <label htmlFor="use-history">Use History:</label>
         <div className="toggle-switch">
@@ -118,22 +138,51 @@ const ChatOptions = ({ options }) => {
           </button>
         </div>
       </div>
-
+      
       <div className="option">
-        <label>LLM Model:</label>
-        <span>{llmModel}</span>
+        <div className="slider-container">
+          <input
+            type="range"
+            min="0"
+            max={models.find(model => model.name === llmModel).context_limit}
+            value={nLastTokens}
+            onChange={handleNLastSliderChange}
+            className="vertical-slider"
+            style={{
+              writingMode: 'bt-lr', // Vertical text orientation for Firefox compatibility
+            }}
+          />
+          <div className="slider-value">{nLastTokens}</div>
+        </div>
       </div>
-
+      <br/>
+      <br/>
+      <br/>
+      <br/>
+      <br/>
+      <br/>
+      <br/>
+      <br/>
+      <br/>
+      <br/>
+      <br/>
       <div className="option">
-        <label>Last Tokens:</label>
-        <span>{nLastTokens}</span>
+        <div className="slider-container">
+          <input
+            type="range"
+            min="0"
+            max={models.find(model => model.name === llmModel).context_limit}
+            value={nBestTokens}
+            onChange={handleNBestSliderChange}
+            className="vertical-slider"
+            style={{
+              writingMode: 'bt-lr', // Vertical text orientation for Firefox compatibility
+            }}
+          />
+          <div className="slider-value">{nBestTokens}</div>
+        </div>
       </div>
-
-      <div className="option">
-        <label>Best Tokens:</label>
-        <span>{nBestTokens}</span>
-      </div>
-    </div>
+  </div>
   );
 };
 

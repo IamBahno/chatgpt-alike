@@ -16,4 +16,38 @@
     margin-bottom: 10px;
   }
   
+  .slider-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .vertical-slider {
+    -webkit-appearance: none;
+    width: 300px; /* The width of the slider (will behave like height after rotation) */
+    height: 10px;
+    transform: rotate(-90deg); /* Rotate the slider to make it vertical */
+    margin: 20px 0;
+  }
+  
+  .vertical-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px; /* Size of the thumb */
+    height: 20px;
+    background: #4CAF50;
+    cursor: pointer;
+  }
+  
+  .vertical-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: #4CAF50;
+    cursor: pointer;
+  }
+  
+  .slider-value {
+    font-size: 1.2rem;
+    margin-top: 10px;
+  }
   

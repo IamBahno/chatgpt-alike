@@ -6,8 +6,8 @@ import App, { AppContext } from '../App';
 import axios from 'axios';
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 
-const ChatDisplay = ({ conversationEntries, setConversationEntries, genResponse }) => {
-  const { accessToken, optionsData, currentChat, setCurrentChat, addChatToList } = useContext(AppContext); 
+const ChatDisplay = ({ conversationEntries, setConversationEntries, genResponse, optionsData }) => {
+  const { accessToken, currentChat, setCurrentChat, addChatToList } = useContext(AppContext); 
   const [eventSource, setEventSource] = useState(null); // State to manage eventSource
 
   const handleSendMessage = async (userPrompt,chatId) => {

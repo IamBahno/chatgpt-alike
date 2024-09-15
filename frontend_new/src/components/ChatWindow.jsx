@@ -71,10 +71,10 @@ const ChatWindow = () => {
   }
   return (
     <div className="chat-window">
-      <ChatDisplay conversationEntries={conversationEntries} setConversationEntries={setConversationEntries} genResponse={genResponse}/> {/* Pass chat data to ChatDisplay */}
+      <ChatDisplay conversationEntries={conversationEntries} setConversationEntries={setConversationEntries} genResponse={genResponse} optionsData={optionsData}/> {/* Pass chat data to ChatDisplay */}
       <ChatInput onUserPrompt={handleUserPrompt} /> {/* Pass the handler for user prompt */}
       <ApiKeyManager/>
-      <ChatOptions options={optionsData} /> {/* Pass options data to ChatOptions */}
+      <ChatOptions options={optionsData} setOptionsData={setOptionsData} /> {/* Pass options data to ChatOptions */}
     </div>
   );
 };
