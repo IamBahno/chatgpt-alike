@@ -13,6 +13,7 @@ from .database import get_db
 from .models import User, Chat, ChatOption, ConversationEntry, Message
 from .auth import get_current_user_or_none, get_current_user
 from .converters import chat_model_to_chat_schema
+from .llm_models_data import get_all_models,get_model
 
 router = APIRouter()
 load_dotenv()
@@ -64,7 +65,6 @@ def generate_chat_title(prompt:str,user : User):
     )
     return response.choices[0].message.content    
 
-#TODO vektory
 def save_chat_entry(chat : Chat,user_prompt: str, user_prompt_tokens:int, ai_response: str, ai_response_tokens: int, cost: float, embedding: bytes,db : Session):
     try:
         user_message = Message(
@@ -85,7 +85,6 @@ def save_chat_entry(chat : Chat,user_prompt: str, user_prompt_tokens:int, ai_res
         )
         db.add(conversation_entry)
         db.commit()
-        print("ukldam entry do db")
     except Exception as e:
         db.rollback()
         print(f"Error saving to DB: {e}")
@@ -96,17 +95,19 @@ def generate_vector(prompt,response,user):
     np_embedding = np.array(embedding, dtype=np.float32)
     return np_embedding
 
+def calculate_cost(input_tokens,output_tokens,model : LLModel):
+    # price is for milion tokens
+    return input_tokens * model.input_tokens_price/1_000_000 + output_tokens * model.output_tokens_price/1_000_000
 
 # mel by fungovat pro prvni request i pro nasledujici
 # TODO pridat instrukce
 # #TODO pridat ten historickej context
 # TODO pridat count vypocet
-# TODO vectory
 def get_openai_generator(prompt: str, options: ChatOption, chat: Chat,user:User,db: Session):
     client = OpenAI(api_key = user.api_key)
     openai_stream = client.chat.completions.create(
         model=options.llm_model,
-        messages=[{"role": "user", "content": prompt}],
+        messages=[{"role":"system","content":"You are helpful assistant. You generate responses in markup."},{"role": "user", "content": prompt}],
         temperature=0.0,
         stream=True
     )
@@ -121,8 +122,9 @@ def get_openai_generator(prompt: str, options: ChatOption, chat: Chat,user:User,
 
     # After streaming all data, send the final summary
     tokens_generated_count = len(encoding.encode(full_response))
+    # TODO add the tokens of instruction and context messages
     input_token_count = len(encoding.encode(prompt))
-    cost = 0.0  # Example cost calculation
+    cost = calculate_cost(input_token_count,tokens_generated_count,get_model(options.llm_model))
     yield json.dumps({"type": "final", "data": {"cost": cost, "chat_id": chat.id, "chat_title":chat.title}})
 
     # Perform post-processing, such as saving to the database
@@ -210,10 +212,7 @@ async def respond_to_message(promt_request: PromptRequest,db: Session = Depends(
     
     return EventSourceResponse(event_generator())
 
-# TODO
 @router.get("/models")
 async def models() -> ModelsResponce:
-    model1 = LLModel(name="gpt-3.5-turbo",displayName="GPT-3",context_limit=4000,input_tokens_price = 0.5, output_tokens_price = 0.4 )
-    model2 = LLModel(name="gpt-4",displayName="GPT-4",context_limit=8000,input_tokens_price = 0.5, output_tokens_price = 0.4 )
-    model3 = LLModel(name="gpt-davici3",displayName="Davici-3",context_limit=4000,input_tokens_price = 0.5, output_tokens_price = 0.4 )
-    return ModelsResponce(models = [model1,model2,model3])
+    models = get_all_models()
+    return ModelsResponce(models = models)

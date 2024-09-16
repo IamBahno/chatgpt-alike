@@ -96,7 +96,7 @@ const ChatDisplay = ({ conversationEntries, setConversationEntries, genResponse,
           onmessage(event) {
             console.log("Received event data:",event.data);
             // # Extract the JSON part
-            let jsonPart = event.data.split("data: ")[1].replace(/'/g, '"');
+            let jsonPart = event.data.split("data: ")[1]
 
             // Parse the JSON part
             const parsedData = JSON.parse(jsonPart);

@@ -62,8 +62,8 @@ class LLModel(BaseModel):
     name : str
     displayName : str
     context_limit : int
-    input_tokens_price : float
-    output_tokens_price : float
+    input_tokens_price : float #per million tokens
+    output_tokens_price : float #per million tokens
 
 
 class ModelsResponce(BaseModel):
