@@ -53,6 +53,16 @@ async def get_chats(chat_request: ChatRequest = Depends(),db: Session = Depends(
     chat_schema = chat_model_to_chat_schema(chat_model)
     return chat_schema
 
+def generate_chat_title(prompt:str,user : User):
+    client = OpenAI(api_key = user.api_key)
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[ {"role": "system", "content": "You are a tool used to generate name of chat, based on user prompt. Return only the name of the chat. Dont put any quotes around the name or anything. And try to make it max 4 words long."},
+                  {"role": "user", "content": prompt}],
+        temperature=0.0,
+    )
+    return response.choices[0].message.content    
+
 #TODO vektory
 def save_chat_entry(chat : Chat,user_prompt: str, user_prompt_tokens:int, ai_response: str, ai_response_tokens: int, cost: float, db : Session):
     try:
@@ -79,6 +89,7 @@ def save_chat_entry(chat : Chat,user_prompt: str, user_prompt_tokens:int, ai_res
         print(f"Error saving to DB: {e}")
 
 # mel by fungovat pro prvni request i pro nasledujici
+# TODO pridat instrukce
 # #TODO pridat ten historickej context
 # TODO pridat count vypocet
 # TODO vectory
@@ -115,7 +126,7 @@ def get_openai_generator(prompt: str, options: ChatOption, chat: Chat,user:User,
                     db = db)  # Save after streaming
 
 # TODO umazat database transakce jak pudou
-# TODO jmeno chatu
+# TODO do budoucna dodelat ze se jmeno bude generovat pararelne/asynchrone
 # TODO dodelat handling kdyz to selze
 @router.post("/first_message")
 async def respond_to_first_message(promt_request: FirstPromptRequest,db: Session = Depends(get_db), user: User = Depends(get_current_user)):
@@ -126,8 +137,10 @@ async def respond_to_first_message(promt_request: FirstPromptRequest,db: Session
     # dostanu user model
     user = db.merge(user)
 
+    chat_title = generate_chat_title(promt_request.prompt,user)
+
     # vytvorim chat model
-    chat = Chat(owner = user,title = "jmenp")
+    chat = Chat(owner = user,title = chat_title)
     db.add(chat)
     db.commit()
     db.refresh(chat)

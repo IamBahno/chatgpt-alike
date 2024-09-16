@@ -5,6 +5,7 @@ import axios from 'axios';
 import { AppContext } from '../App'; // Import the context
 import './ChatList.css'; // CSS file for styling the chat list
 
+// TODO add delete and rename
 const ChatList = ({ onSelectChat }) => {
   // const { accessToken } = useContext(AppContext); // Access the accessToken from context
   // const [chats, setChats] = useState([]); // State to store fetched chats
