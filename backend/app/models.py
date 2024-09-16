@@ -61,7 +61,7 @@ class ConversationEntry(Base):
     
     id = Column(Integer, primary_key=True, autoincrement=True)
     timestamp = Column(DateTime, default=func.now(), nullable=False)  # Timestamp of when the message was created
-    vector = Column(LargeBinary) # Vector that represent the Entry
+    embedding = Column(LargeBinary) # Vector that represent the Entry
     tokens = Column(Integer)
     cost = Column(Float) # in dollars
 

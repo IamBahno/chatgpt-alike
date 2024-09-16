@@ -1,6 +1,7 @@
 import tiktoken
 import os
 import json
+import numpy as np
 from fastapi import FastAPI, HTTPException, APIRouter, Depends
 from sqlalchemy.orm import Session
 from fastapi.responses import StreamingResponse
@@ -64,7 +65,7 @@ def generate_chat_title(prompt:str,user : User):
     return response.choices[0].message.content    
 
 #TODO vektory
-def save_chat_entry(chat : Chat,user_prompt: str, user_prompt_tokens:int, ai_response: str, ai_response_tokens: int, cost: float, db : Session):
+def save_chat_entry(chat : Chat,user_prompt: str, user_prompt_tokens:int, ai_response: str, ai_response_tokens: int, cost: float, embedding: bytes,db : Session):
     try:
         user_message = Message(
             text = user_prompt,
@@ -80,6 +81,7 @@ def save_chat_entry(chat : Chat,user_prompt: str, user_prompt_tokens:int, ai_res
             user_prompt = user_message,
             ai_response = ai_message,
             chat = chat,
+            embedding = embedding
         )
         db.add(conversation_entry)
         db.commit()
@@ -87,6 +89,13 @@ def save_chat_entry(chat : Chat,user_prompt: str, user_prompt_tokens:int, ai_res
     except Exception as e:
         db.rollback()
         print(f"Error saving to DB: {e}")
+
+def generate_vector(prompt,response,user):
+    client = OpenAI(api_key=user.api_key)
+    embedding = client.embeddings.create(input=[f"{prompt};{response}"],model = "text-embedding-3-small").data[0].embedding
+    np_embedding = np.array(embedding, dtype=np.float32)
+    return np_embedding
+
 
 # mel by fungovat pro prvni request i pro nasledujici
 # TODO pridat instrukce
@@ -117,13 +126,18 @@ def get_openai_generator(prompt: str, options: ChatOption, chat: Chat,user:User,
     yield json.dumps({"type": "final", "data": {"cost": cost, "chat_id": chat.id, "chat_title":chat.title}})
 
     # Perform post-processing, such as saving to the database
+
+    embedding = generate_vector(prompt,full_response,user)
+    embedding_bytes = embedding.tobytes()
+
     save_chat_entry(chat=chat,
                     user_prompt=prompt,
                     user_prompt_tokens=input_token_count,
                     ai_response=full_response,
                     ai_response_tokens=tokens_generated_count,
                     cost=cost,
-                    db = db)  # Save after streaming
+                    db = db,
+                    embedding=embedding_bytes)  # Save after streaming
 
 # TODO umazat database transakce jak pudou
 # TODO do budoucna dodelat ze se jmeno bude generovat pararelne/asynchrone
