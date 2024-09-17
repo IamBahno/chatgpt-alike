@@ -5,7 +5,6 @@ import './ChatOptions.css'; // Optional: CSS for styling
 import * as Constants from '../constants';
 
 //TODO kdyz use history false, nemela by byt moznost menit nastaveni historie
-//TODO history type
 const ChatOptions = ({ options, setOptionsData }) => {
   // State variables initialized to null to prevent incorrect renders
   const [useHistory, setUseHistory] = useState(null);

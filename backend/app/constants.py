@@ -1,5 +1,8 @@
 from .schemas import LLModel
 
+N_LAST_TOKENS_TYPE = "N_LAST_TOKENS"
+N_BEST_TOKENS_TYPE = "N_BEST_TOKENS"
+
 DEFAULT_CHAT = LLModel(name="gpt-4o-mini",displayName="GPT-4o-mini",context_limit=128_000,input_tokens_price = 0.15, output_tokens_price = 0.6 )
 
 models = [  LLModel(name="gpt-3.5-turbo",displayName="GPT-3.5-turbo",context_limit=16_385,input_tokens_price = 0.5, output_tokens_price = 1.5 ),
