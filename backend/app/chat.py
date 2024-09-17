@@ -100,18 +100,40 @@ def calculate_cost(input_tokens,output_tokens,model : LLModel):
     # price is for milion tokens
     return input_tokens * model.input_tokens_price/1_000_000 + output_tokens * model.output_tokens_price/1_000_000
 
+def get_messages(options : Options, prompt : str, chat : Chat,input_token_count):
+    messages = []
+    
+    instructions = {"role":"system","content":"You are helpful assistant. You generate responses in markup."}
+    messages.append(instructions)
+
+    if(options.use_history == True):
+        hisory_messages = get_chat_context(options, input_token_count, chat)
+        messages.extend(hisory_messages)
+
+    user_prompt = {"role": "user", "content": prompt}
+    messages.append(user_prompt)
+    return messages
+
+
 # mel by fungovat pro prvni request i pro nasledujici
 # #TODO pridat ten historickej context
 #TODO asyncio tiktoken
+#TODO add await generate vector
 async def get_openai_generator(prompt: str, options: ChatOption, chat: Chat,user:User,db: Session):
+    chat = db.merge(chat) #TODO nekam prepsat
+    encoding = tiktoken.encoding_for_model(options.llm_model)
+    input_token_count = len(encoding.encode(prompt))
+
+    # history_context = get_chat_context(options,prompt,chat)
+    messages_for_bot = get_messages(options,prompt,chat,input_token_count)
     client = AsyncOpenAI(api_key = user.api_key)
     openai_stream = await client.chat.completions.create(
         model=options.llm_model,
-        messages=[{"role":"system","content":"You are helpful assistant. You generate responses in markup."},{"role": "user", "content": prompt}],
+        # messages=[{"role":"system","content":"You are helpful assistant. You generate responses in markup."},{"role": "user", "content": prompt}],
+        messages = messages_for_bot,
         temperature=0.0,
         stream=True
     )
-    encoding = tiktoken.encoding_for_model("gpt-3.5-turbo")
     full_response = ""  # To store the full response
     # Stream response from OpenAI
     async for event in openai_stream:
@@ -124,14 +146,14 @@ async def get_openai_generator(prompt: str, options: ChatOption, chat: Chat,user
     # After streaming all data, send the final summary
     tokens_generated_count = len(encoding.encode(full_response))
     # TODO add the tokens of instruction and context messages
-    input_token_count = len(encoding.encode(prompt))
+
     cost = calculate_cost(input_token_count,tokens_generated_count,get_model(options.llm_model))
     # yield json.dumps({"type": "final", "data": {"cost": cost, "chat_id": chat.id, "chat_title":chat.title}})
     yield f'data: {json.dumps({"type": "final", "data": {"cost": cost, "chat_id": chat.id, "chat_title":chat.title}})}\n\n'
 
     # Perform post-processing, such as saving to the database
 
-    embedding = await generate_vector(prompt,full_response,user)
+    embedding = generate_vector(prompt,full_response,user)
     embedding_bytes = embedding.tobytes()
 
     save_chat_entry(chat=chat,
