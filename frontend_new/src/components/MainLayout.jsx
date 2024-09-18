@@ -5,6 +5,7 @@ import ChatWindow from './ChatWindow';
 import { AppContext } from '../App';
 import './MainLayout.css'; // Import a CSS file for styling
 
+//TODO odeslu zpravu ale uz mi vypresel token -> dostanu unathorized || musim udelat refresh a odeslat znovu, nebo dat relace vypresela registrujte se znovu 
 const MainLayout = () => {
   const { currentChat, handleSelectChat, userPreferences, handleUpdatePreferences } = useContext(AppContext);
 

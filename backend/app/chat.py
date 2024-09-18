@@ -90,6 +90,7 @@ def save_chat_entry(chat : Chat,user_prompt: str, user_prompt_tokens:int, ai_res
         db.rollback()
         print(f"Error saving to DB: {e}")
 
+# TODO async
 def generate_vector(prompt,response,user):
     client = OpenAI(api_key=user.api_key)
     embedding = client.embeddings.create(input=[f"{prompt};{response}"],model = "text-embedding-3-small").data[0].embedding
@@ -100,14 +101,14 @@ def calculate_cost(input_tokens,output_tokens,model : LLModel):
     # price is for milion tokens
     return input_tokens * model.input_tokens_price/1_000_000 + output_tokens * model.output_tokens_price/1_000_000
 
-def get_messages(options : Options, prompt : str, chat : Chat,input_token_count):
+def get_messages(options : Options, prompt : str, chat : Chat,input_token_count,api_key : str):
     messages = []
     
     instructions = {"role":"system","content":"You are helpful assistant. You generate responses in markup."}
     messages.append(instructions)
 
     if(options.use_history == True):
-        hisory_messages = get_chat_context(options, input_token_count, chat)
+        hisory_messages = get_chat_context(options, input_token_count, chat,api_key,prompt)
         messages.extend(hisory_messages)
 
     user_prompt = {"role": "user", "content": prompt}
@@ -125,7 +126,7 @@ async def get_openai_generator(prompt: str, options: ChatOption, chat: Chat,user
     input_token_count = len(encoding.encode(prompt))
 
     # history_context = get_chat_context(options,prompt,chat)
-    messages_for_bot = get_messages(options,prompt,chat,input_token_count)
+    messages_for_bot = get_messages(options,prompt,chat,input_token_count, user.api_key)
     client = AsyncOpenAI(api_key = user.api_key)
     openai_stream = await client.chat.completions.create(
         model=options.llm_model,
