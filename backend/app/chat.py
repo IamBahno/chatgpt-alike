@@ -13,7 +13,7 @@ from .database import get_db
 from .models import User, Chat, ChatOption, ConversationEntry, Message
 from .auth import get_current_user_or_none, get_current_user
 from .converters import chat_model_to_chat_schema
-from .constants import get_all_models,get_model
+from .constants import get_all_models,get_model, EMBEDDING_MODEL, TITLE_GENERATOR_INSTRUCTIONS, MODEL_INSTRUCIONS
 from .chat_history import get_chat_context
 
 router = APIRouter()
@@ -60,7 +60,7 @@ def generate_chat_title(prompt:str,user : User):
     client = OpenAI(api_key = user.api_key)
     response = client.chat.completions.create(
         model="gpt-3.5-turbo",
-        messages=[ {"role": "system", "content": "You are a tool used to generate name of chat, based on user prompt. Return only the name of the chat. Dont put any quotes around the name or anything. And try to make it max 4 words long."},
+        messages=[ {"role": "system", "content": TITLE_GENERATOR_INSTRUCTIONS},
                   {"role": "user", "content": prompt}],
         temperature=0.0,
     )
@@ -90,10 +90,11 @@ def save_chat_entry(chat : Chat,user_prompt: str, user_prompt_tokens:int, ai_res
         db.rollback()
         print(f"Error saving to DB: {e}")
 
-# TODO async
-def generate_vector(prompt,response,user):
-    client = OpenAI(api_key=user.api_key)
-    embedding = client.embeddings.create(input=[f"{prompt};{response}"],model = "text-embedding-3-small").data[0].embedding
+# TODO instructions predelat na constants
+async def generate_vector(prompt,response,user):
+    client = AsyncOpenAI(api_key=user.api_key)
+    response = await client.embeddings.create(input=[f"{prompt};{response}"],model = EMBEDDING_MODEL)
+    embedding = response.data[0].embedding
     np_embedding = np.array(embedding, dtype=np.float32)
     return np_embedding
 
@@ -101,14 +102,14 @@ def calculate_cost(input_tokens,output_tokens,model : LLModel):
     # price is for milion tokens
     return input_tokens * model.input_tokens_price/1_000_000 + output_tokens * model.output_tokens_price/1_000_000
 
-def get_messages(options : Options, prompt : str, chat : Chat,input_token_count,api_key : str):
+async def get_messages(options : Options, prompt : str, chat : Chat,input_token_count,api_key : str):
     messages = []
     
-    instructions = {"role":"system","content":"You are helpful assistant. You generate responses in markup."}
+    instructions = {"role":"system","content":MODEL_INSTRUCIONS}
     messages.append(instructions)
 
     if(options.use_history == True):
-        hisory_messages = get_chat_context(options, input_token_count, chat,api_key,prompt)
+        hisory_messages = await get_chat_context(options, input_token_count, chat,api_key,prompt)
         messages.extend(hisory_messages)
 
     user_prompt = {"role": "user", "content": prompt}
@@ -126,11 +127,10 @@ async def get_openai_generator(prompt: str, options: ChatOption, chat: Chat,user
     input_token_count = len(encoding.encode(prompt))
 
     # history_context = get_chat_context(options,prompt,chat)
-    messages_for_bot = get_messages(options,prompt,chat,input_token_count, user.api_key)
+    messages_for_bot = await get_messages(options,prompt,chat,input_token_count, user.api_key)
     client = AsyncOpenAI(api_key = user.api_key)
     openai_stream = await client.chat.completions.create(
         model=options.llm_model,
-        # messages=[{"role":"system","content":"You are helpful assistant. You generate responses in markup."},{"role": "user", "content": prompt}],
         messages = messages_for_bot,
         temperature=0.0,
         stream=True
@@ -154,7 +154,7 @@ async def get_openai_generator(prompt: str, options: ChatOption, chat: Chat,user
 
     # Perform post-processing, such as saving to the database
 
-    embedding = generate_vector(prompt,full_response,user)
+    embedding = await generate_vector(prompt,full_response,user)
     embedding_bytes = embedding.tobytes()
 
     save_chat_entry(chat=chat,
