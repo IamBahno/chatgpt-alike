@@ -16,15 +16,15 @@ async def generate_vector(prompt,api_key):
 async def get_chat_context(options: ChatOption, user_prompt_tokens : int, chat : Chat, api_key : str,user_prompt : str):
     if(options.history_type == N_BEST_TOKENS_TYPE):
         max_tokens = options.n_best_tokens - TOKEN_SAFETY_MARGIN
-        messages = await best_tokens_context(max_tokens, user_prompt_tokens, chat, api_key, user_prompt=user_prompt)
+        messages, history_tokens = await best_tokens_context(max_tokens, user_prompt_tokens, chat, api_key, user_prompt=user_prompt)
 
     elif(options.history_type==N_LAST_TOKENS_TYPE):
         max_tokens = options.n_last_tokens - TOKEN_SAFETY_MARGIN
-        messages = last_tokens_context(max_tokens, user_prompt_tokens, chat)
+        messages, history_tokens = last_tokens_context(max_tokens, user_prompt_tokens, chat)
 
     else:
         raise Exception
-    return messages
+    return messages, history_tokens
 
 def context_message(role: str, message: str):
     if(role not in ["system", "user", "assistant"]):
@@ -57,14 +57,16 @@ def get_context_messages(sorted_con_entries,max_tokens,user_prompt_tokens):
             tokens += con_entry.ai_response.tokens
             context_messages.append(context_message("assistant",con_entry.ai_response.text))
             shorten_message = shorten_the_message(con_entry.user_prompt.text,con_entry.user_prompt.tokens,max_tokens - tokens)
+            tokens += max_tokens - tokens
             context_messages.append(context_message("user",shorten_message))
             break
         else:
             # naporcuju ai message a pridam
             shorten_message = shorten_the_message(con_entry.ai_response.text,con_entry.ai_response.tokens,max_tokens - tokens)
+            tokens += max_tokens - tokens
             context_messages.append(context_message("assistant",shorten_message))
             break
-    return context_messages
+    return context_messages,tokens
 
 def last_tokens_context(max_tokens : int , user_prompt_tokens : int, chat : Chat):
     # get the chat entries, sorted with the newest first in list
@@ -72,8 +74,8 @@ def last_tokens_context(max_tokens : int , user_prompt_tokens : int, chat : Chat
     if(con_entries == []):
         return []
 
-    context_messages = get_context_messages(con_entries,max_tokens,user_prompt_tokens)
-    return context_messages    
+    context_messages,tokens_used = get_context_messages(con_entries,max_tokens,user_prompt_tokens)
+    return context_messages,tokens_used    
 
 async def best_tokens_context(max_tokens : int, user_prompt_tokens : int, chat : Chat, api_key : str,user_prompt: str):
     con_entries = chat.conversation_entries
@@ -89,7 +91,7 @@ async def best_tokens_context(max_tokens : int, user_prompt_tokens : int, chat :
 
     sorted_con_entries = [ con_entries[i] for i in sorted_indices]
 
-    context_messages = get_context_messages(sorted_con_entries,max_tokens,user_prompt_tokens)
-    return context_messages    
+    context_messages,tokens_used = get_context_messages(sorted_con_entries,max_tokens,user_prompt_tokens)
+    return context_messages,tokens_used    
 
     

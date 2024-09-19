@@ -90,7 +90,6 @@ def save_chat_entry(chat : Chat,user_prompt: str, user_prompt_tokens:int, ai_res
         db.rollback()
         print(f"Error saving to DB: {e}")
 
-# TODO instructions predelat na constants
 async def generate_vector(prompt,response,user):
     client = AsyncOpenAI(api_key=user.api_key)
     response = await client.embeddings.create(input=[f"{prompt};{response}"],model = EMBEDDING_MODEL)
@@ -109,25 +108,22 @@ async def get_messages(options : Options, prompt : str, chat : Chat,input_token_
     messages.append(instructions)
 
     if(options.use_history == True):
-        hisory_messages = await get_chat_context(options, input_token_count, chat,api_key,prompt)
+        hisory_messages, history_tokens = await get_chat_context(options, input_token_count, chat,api_key,prompt)
         messages.extend(hisory_messages)
 
     user_prompt = {"role": "user", "content": prompt}
     messages.append(user_prompt)
-    return messages
+    return messages, history_tokens
 
 
 # mel by fungovat pro prvni request i pro nasledujici
-# #TODO pridat ten historickej context
 #TODO asyncio tiktoken
-#TODO add await generate vector
 async def get_openai_generator(prompt: str, options: ChatOption, chat: Chat,user:User,db: Session):
     chat = db.merge(chat) #TODO nekam prepsat
     encoding = tiktoken.encoding_for_model(options.llm_model)
     input_token_count = len(encoding.encode(prompt))
 
-    # history_context = get_chat_context(options,prompt,chat)
-    messages_for_bot = await get_messages(options,prompt,chat,input_token_count, user.api_key)
+    messages_for_bot, history_tokens = await get_messages(options,prompt,chat,input_token_count, user.api_key)
     client = AsyncOpenAI(api_key = user.api_key)
     openai_stream = await client.chat.completions.create(
         model=options.llm_model,
@@ -146,9 +142,8 @@ async def get_openai_generator(prompt: str, options: ChatOption, chat: Chat,user
 
     # After streaming all data, send the final summary
     tokens_generated_count = len(encoding.encode(full_response))
-    # TODO add the tokens of instruction and context messages
 
-    cost = calculate_cost(input_token_count,tokens_generated_count,get_model(options.llm_model))
+    cost = calculate_cost(input_token_count+history_tokens,tokens_generated_count,get_model(options.llm_model))
     # yield json.dumps({"type": "final", "data": {"cost": cost, "chat_id": chat.id, "chat_title":chat.title}})
     yield f'data: {json.dumps({"type": "final", "data": {"cost": cost, "chat_id": chat.id, "chat_title":chat.title}})}\n\n'
 
