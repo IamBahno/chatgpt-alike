@@ -104,7 +104,8 @@ def calculate_cost(input_tokens,output_tokens,model : LLModel):
 
 async def get_messages(options : Options, prompt : str, chat : Chat,input_token_count,api_key : str):
     messages = []
-    
+    history_tokens = 0
+
     instructions = {"role":"system","content":MODEL_INSTRUCIONS}
     messages.append(instructions)
 
@@ -155,9 +156,8 @@ async def get_openai_generator(prompt: str, options: ChatOption, chat: Chat,user
 
     cost = calculate_cost(input_token_count+history_tokens,tokens_generated_count,get_model(options.llm_model))
     # yield json.dumps({"type": "final", "data": {"cost": cost, "chat_id": chat.id, "chat_title":chat.title}})
-    yield f'data: {json.dumps({"type": "final", "data": {"cost": cost, "chat_id": chat.id, "chat_title":chat.title}})}\n\n'
 
-    # Perform post-processing, such as saving to the database
+
 
     embedding = await generate_vector(prompt,full_response,user)
     embedding_bytes = embedding.tobytes()
@@ -170,6 +170,8 @@ async def get_openai_generator(prompt: str, options: ChatOption, chat: Chat,user
                     cost=cost,
                     db = db,
                     embedding=embedding_bytes)  # Save after streaming
+
+    yield f'data: {json.dumps({"type": "final", "data": {"cost": cost, "chat_id": chat.id, "chat_title":chat.title}})}\n\n'
 
 # TODO do budoucna dodelat ze se jmeno bude generovat pararelne/asynchrone
 # TODO dodelat handling kdyz to selze
