@@ -2,6 +2,7 @@ import React, { useContext, useState } from 'react';
 import { AppContext } from '../App';
 import './Header.css'; // Assuming there's a CSS file for styling
 
+//TODO kdyz dam login/register v consoli jsou nejaky kecy o nullu
 const Header = () => {
   const { currentUser, handleLogin, handleLogout } = useContext(AppContext);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -59,8 +60,7 @@ const Header = () => {
       alert('An error occurred while trying to register.');
     }
   };
-  console.log("currentUser");
-  console.log(currentUser);
+
   return (
     <header className="header">
       <div className="logo">

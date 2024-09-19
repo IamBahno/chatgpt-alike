@@ -57,9 +57,9 @@ async def get_chats(chat_request: ChatRequest = Depends(),db: Session = Depends(
     chat_schema = chat_model_to_chat_schema(chat_model)
     return chat_schema
 
-def generate_chat_title(prompt:str,user : User):
-    client = OpenAI(api_key = user.api_key)
-    response = client.chat.completions.create(
+async def generate_chat_title(prompt:str,user : User):
+    client = AsyncOpenAI(api_key = user.api_key)
+    response = await client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[ {"role": "system", "content": TITLE_GENERATOR_INSTRUCTIONS},
                   {"role": "user", "content": prompt}],
@@ -182,7 +182,7 @@ async def respond_to_first_message(promt_request: FirstPromptRequest,db: Session
     # dostanu user model
     user = db.merge(user)
 
-    chat_title = generate_chat_title(promt_request.prompt,user)
+    chat_title = await generate_chat_title(promt_request.prompt,user)
 
     # vytvorim chat model
     chat = Chat(owner = user,title = chat_title)
@@ -229,7 +229,7 @@ async def respond_to_message(promt_request: PromptRequest,db: Session = Depends(
     chat = db.query(Chat).filter(Chat.id == promt_request.chat_id).first()
     # pokud zmeni chat options tak je prepisu a ulozim
     check_update_options(db, promt_request.options,chat.option)
-
+    
     generator = get_openai_generator(promt_request.prompt,promt_request.options,chat,user,db)
 
     # return EventSourceResponse(event_generator())

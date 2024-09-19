@@ -8,7 +8,6 @@ from fastapi.middleware.cors import CORSMiddleware
 # from typing import List
 from . import models
 from .database import SessionLocal, engine
-from app import api
 from app import auth
 from app import chat
 
@@ -32,6 +31,5 @@ def root():
     return {"message": "Welcome to FastAPI with SQLAlchemy"}
 
 
-app.include_router(api.router, tags=['Notes'], prefix='/api')
 app.include_router(auth.router, tags=['Notes'], prefix='/auth')
 app.include_router(chat.router, tags=['Notes'], prefix='/chat')

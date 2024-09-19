@@ -9,6 +9,7 @@ import { fetchEventSource } from '@microsoft/fetch-event-source';
 // TODO add button that creates a new chat
 // TODO special visual for generated code
 // TODO markup
+// TODO nejakej novej errror, kdyz napisu first message, vytvori se novej chat ale nezobrazi se chat, musim chat otevrit znovu abych to videl
 const ChatDisplay = ({ conversationEntries, setConversationEntries, genResponse, optionsData }) => {
   const { accessToken, currentChat, setCurrentChat, addChatToList } = useContext(AppContext); 
   const [eventSource, setEventSource] = useState(null); // State to manage eventSource
