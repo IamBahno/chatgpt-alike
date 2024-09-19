@@ -1,4 +1,5 @@
 import tiktoken
+import tiktoken_async
 import os
 import json
 import numpy as np
@@ -115,13 +116,22 @@ async def get_messages(options : Options, prompt : str, chat : Chat,input_token_
     messages.append(user_prompt)
     return messages, history_tokens
 
+async def get_encoding(llm_model : str):
+    # async tiktoken doesnt known newer encodings
+    if(llm_model.startswith("gpt-4o")):
+        encoding = tiktoken.encoding_for_model(llm_model)
+    else:
+        encoding = await tiktoken_async.encoding_for_model(llm_model)
+    return encoding
 
 # mel by fungovat pro prvni request i pro nasledujici
-#TODO asyncio tiktoken
 async def get_openai_generator(prompt: str, options: ChatOption, chat: Chat,user:User,db: Session):
-    chat = db.merge(chat) #TODO nekam prepsat
-    encoding = tiktoken.encoding_for_model(options.llm_model)
+    chat = db.merge(chat)
+
+    encoding = await get_encoding(options.llm_model)
+
     input_token_count = len(encoding.encode(prompt))
+
 
     messages_for_bot, history_tokens = await get_messages(options,prompt,chat,input_token_count, user.api_key)
     client = AsyncOpenAI(api_key = user.api_key)
@@ -219,7 +229,7 @@ async def respond_to_message(promt_request: PromptRequest,db: Session = Depends(
     chat = db.query(Chat).filter(Chat.id == promt_request.chat_id).first()
     # pokud zmeni chat options tak je prepisu a ulozim
     check_update_options(db, promt_request.options,chat.option)
-    
+
     generator = get_openai_generator(promt_request.prompt,promt_request.options,chat,user,db)
 
     # return EventSourceResponse(event_generator())

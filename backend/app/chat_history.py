@@ -14,6 +14,8 @@ async def generate_vector(prompt,api_key):
 # i call the proper history method
 # and i substact some error margin from max tokens (because of differences in vocabularies in different models, and due to the fact that i shorten messages in rough way)
 async def get_chat_context(options: ChatOption, user_prompt_tokens : int, chat : Chat, api_key : str,user_prompt : str):
+    if(chat.conversation_entries == []):
+        return [],0
     if(options.history_type == N_BEST_TOKENS_TYPE):
         max_tokens = options.n_best_tokens - TOKEN_SAFETY_MARGIN
         messages, history_tokens = await best_tokens_context(max_tokens, user_prompt_tokens, chat, api_key, user_prompt=user_prompt)
