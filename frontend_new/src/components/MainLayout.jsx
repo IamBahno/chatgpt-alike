@@ -1,21 +1,18 @@
 import React, { useContext } from 'react';
 import ChatList from './ChatList';
 import ChatWindow from './ChatWindow';
-// import UserSettings from './UserSettings';
-import { AppContext } from '../App';
+import { AppContext } from '../context/AppContextProvider';
 import './MainLayout.css'; // Import a CSS file for styling
 
 //TODO odeslu zpravu ale uz mi vypresel token -> dostanu unathorized || musim udelat refresh a odeslat znovu, nebo dat relace vypresela registrujte se znovu 
 const MainLayout = () => {
-  const { currentChat, handleSelectChat } = useContext(AppContext);
-
   return (
     <div className="main-layout">
       <div className="chat-list-container">
-        <ChatList onSelectChat={handleSelectChat} />
+        <ChatList/>
       </div>
         <div className="chat-window-container">
-        <ChatWindow currentChat={currentChat} />
+        <ChatWindow/>
       </div>
     </div>
   );

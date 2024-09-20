@@ -1,8 +1,8 @@
 import React, { useContext, useState } from 'react';
-import { AppContext } from '../App';
+import { AppContext } from '../context/AppContextProvider';
 import LoginModal from './Login';
 import RegisterModal from './Register';
-import './Header.css'; // Assuming there's a CSS file for styling
+import './Header.css';
 
 const Header = () => {
   const { currentUser, handleLogin, handleLogout } = useContext(AppContext);

@@ -2,14 +2,14 @@
 
 import React, { useContext, useEffect, useState } from 'react';
 import axios from 'axios';
-import { AppContext } from '../App'; // Import the context
+import { AppContext } from '../context/AppContextProvider'; // Import the context
 import './ChatList.css'; // CSS file for styling the chat list
 
 // TODO add delete and rename
-const ChatList = ({ onSelectChat }) => {
+const ChatList = ({}) => {
   // const { accessToken } = useContext(AppContext); // Access the accessToken from context
   // const [chats, setChats] = useState([]); // State to store fetched chats
-  const { accessToken, chats, setChats, currentChat } = useContext(AppContext);
+  const { accessToken, chats, setChats, currentChat, setCurrentChat } = useContext(AppContext);
   useEffect(() => {
     const fetchChats = async () => {
       try {
@@ -36,7 +36,7 @@ const ChatList = ({ onSelectChat }) => {
       <div
         key={chat.id}
         className={`chat-item ${currentChat && chat.id === currentChat.id ? 'active' : ''}`} // Highlight active chat
-        onClick={() => onSelectChat(chat)}
+        onClick={() => setCurrentChat(chat)}
         >
         {chat.title}
       </div>

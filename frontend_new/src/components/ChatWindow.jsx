@@ -2,7 +2,7 @@
 
 import React, { useContext, useEffect, useState } from 'react';
 import axios from 'axios';
-import { AppContext } from '../App';
+import { AppContext } from '../context/AppContextProvider';
 import ChatDisplay from './ChatDisplay';
 import ChatOptions from './ChatOptions';
 import ChatInput from './ChatInput';
@@ -39,13 +39,10 @@ const ChatWindow = () => {
     const fetchChat = async (chat_id) => {
       try{
         const url = `http://localhost:8000/chat/chat?chat_id=${chat_id}`;
-        console.log(accessToken);
         const headers = accessToken
         ? { Authorization: `Bearer ${accessToken}` }  // Add Authorization header if authenticated, if user is not authenticated it will fail on backend
         : {};
-        console.log(headers);
         const response = await axios.get(url,{ headers });
-
         setConversationEntries(response.data.conversation_entries || []); // Set the chat data in state
         setOptionsData(response.data.options || {}); // Set the options data in state
       } catch (error){

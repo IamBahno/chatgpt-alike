@@ -2,7 +2,7 @@
 
 import React, { useContext, useEffect, useState} from 'react';
 import './ChatDisplay.css'; // Optional: CSS for styling
-import App, { AppContext } from '../App';
+import { AppContext } from '../context/AppContextProvider';
 import axios from 'axios';
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 
