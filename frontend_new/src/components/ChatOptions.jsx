@@ -81,6 +81,11 @@ const ChatOptions = ({ options, setOptionsData }) => {
     });
   }
 
+  // Check if the selected model exists and get the context_limit
+  // so i have defined context limit even when the models are not fetched
+  const selectedModel = models.find(model => model.name === llmModel);
+  const contextLimit = selectedModel ? selectedModel.context_limit : 0;
+
   // Handle loading state based on `useHistory` being null initially
   if (useHistory === null) {
     return <div>Loading options...</div>; // Show loading until state updates from options prop
@@ -135,7 +140,7 @@ const ChatOptions = ({ options, setOptionsData }) => {
           <input
             type="range"
             min="0"
-            max={models.find(model => model.name === llmModel).context_limit}
+            max={contextLimit}
             value={nLastTokens}
             onChange={handleNLastSliderChange}
             className="vertical-slider"
@@ -162,7 +167,7 @@ const ChatOptions = ({ options, setOptionsData }) => {
           <input
             type="range"
             min="0"
-            max={models.find(model => model.name === llmModel).context_limit}
+            max={contextLimit}
             value={nBestTokens}
             onChange={handleNBestSliderChange}
             className="vertical-slider"
