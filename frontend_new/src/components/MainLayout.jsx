@@ -10,7 +10,7 @@ const MainLayout = () => {
       <div className="chat-list-container">
         <ChatList/>
       </div>
-        <div className="chat-window-container">
+        <div className="chat-container">
         <ChatContainer/>
       </div>
     </div>

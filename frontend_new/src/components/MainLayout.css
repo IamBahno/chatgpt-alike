@@ -12,7 +12,7 @@
   overflow-y: auto; /* Allow scrolling if chat list gets too long */
 }
 
-.chat-window-container {
+.chat-container {
   flex: 1; /* Take up the remaining space */
   padding: 20px; /* Add some padding for content */
   overflow-y: auto; /* Allow scrolling if content is too long */
