@@ -1,7 +1,6 @@
 import React, { useContext } from 'react';
 import ChatList from './ChatList';
-import ChatWindow from './ChatWindow';
-import { AppContext } from '../context/AppContextProvider';
+import ChatContainer from './ChatContainer';
 import './MainLayout.css'; // Import a CSS file for styling
 
 //TODO odeslu zpravu ale uz mi vypresel token -> dostanu unathorized || musim udelat refresh a odeslat znovu, nebo dat relace vypresela registrujte se znovu 
@@ -12,7 +11,7 @@ const MainLayout = () => {
         <ChatList/>
       </div>
         <div className="chat-window-container">
-        <ChatWindow/>
+        <ChatContainer/>
       </div>
     </div>
   );

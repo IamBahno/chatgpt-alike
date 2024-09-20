@@ -185,7 +185,7 @@ const ChatDisplay = ({ conversationEntries, setConversationEntries, genResponse,
           </div>
           <div className="entry-details">
             <span className="cost">
-              <strong>Cost:</strong> ${entry.cost.toFixed(2)} {/* Format cost to 2 decimal places */}
+              <strong>Cost:</strong> ${entry.cost.toFixed(4)} {/* Format cost to 2 decimal places */}
             </span>
             <span className="timestamp">
               <strong>Time:</strong> {new Date(entry.time).toLocaleString()} {/* Format time nicely */}
