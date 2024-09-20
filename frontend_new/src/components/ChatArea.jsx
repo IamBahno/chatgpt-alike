@@ -5,10 +5,11 @@ import ChatInput from './ChatInput';
 import axios from 'axios';
 
 
+// TODO refactor
 const ChatArea = ({optionsData, setOptionsData}) => {
-    const { apiKey } = useContext(AppContext); // Access the JWT token from context
-    const [conversationEntries, setConversationEntries] = useState([]); // State to store fetched chat data
-    const [genResponse, toggleGenResponse] = useState(false); // State to store fetched options data
+  const { apiKey } = useContext(AppContext); // Access the JWT token from context
+  const [conversationEntries, setConversationEntries] = useState([]); // State to store fetched chat data
+  const [genResponse, toggleGenResponse] = useState(false); // State to store fetched options data
 
 
   const { accessToken, currentChat} = useContext(AppContext); // Access the JWT token from context

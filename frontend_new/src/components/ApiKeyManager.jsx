@@ -1,14 +1,11 @@
-// src/components/ApiKeyManager.jsx
 import axios from 'axios';
 import React, { useContext, useState, useEffect } from 'react';
 import { AppContext } from '../context/AppContextProvider';
 // import './ApiKeyManager.css'; // Optional: CSS for styling
 
 const ApiKeyManager = () => {
-  const { apiKey, handleApiKey } = useContext(AppContext);
-  const { handleLogin} = useContext(AppContext);
+  const { apiKey, handleApiKey, handleLogin, accessToken } = useContext(AppContext);
   const [key, setKey] = useState('');
-  const { accessToken } = useContext(AppContext); // Access the JWT token from context
 
   useEffect(() => {
     // Set the initial state with API key from context if available
@@ -43,7 +40,6 @@ const ApiKeyManager = () => {
         handleLogin(response.data.access_token,response.data.refresh_token);
       } else {
         console.error('Failed to save API key:', response.status);
-        // Optionally handle non-200 responses here
       }
     } catch (error) {
       //the key is not valid

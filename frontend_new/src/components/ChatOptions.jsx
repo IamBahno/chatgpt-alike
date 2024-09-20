@@ -1,9 +1,11 @@
 // src/components/ChatOptions.jsx
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './ChatOptions.css'; // Optional: CSS for styling
 import * as Constants from '../constants';
 
+//TODO dokud se nelognu neni tam context limit
+//TODO kdyz use hostory false, tak to vypne, toggle na history type, ale slidery porad funguji, + aby byl aktivni pouze slider vybraneho typu
 //TODO kdyz use history false, nemela by byt moznost menit nastaveni historie
 const ChatOptions = ({ options, setOptionsData }) => {
   // State variables initialized to null to prevent incorrect renders
@@ -44,9 +46,22 @@ const ChatOptions = ({ options, setOptionsData }) => {
     }
   }, [options]);
 
-  useEffect(() => {
-    updateOptions();
-  }, [llmModel, useHistory, historyType, nLastTokens, nBestTokens]);
+
+   // Memoize the updateOptions function
+   const updateOptions = useCallback(() => {
+    setOptionsData({
+      use_history: useHistory,
+      history_type: historyType,
+      llm_model: llmModel,
+      n_last_tokens: nLastTokens,
+      n_best_tokens: nBestTokens,
+    });
+  }, [useHistory, historyType, llmModel, nLastTokens, nBestTokens, setOptionsData]);
+
+    useEffect(() => {
+      updateOptions();
+  }, [updateOptions]);
+
 
   // Toggle handlers
   const handleUseHistoryToggle = () => {
@@ -64,22 +79,9 @@ const ChatOptions = ({ options, setOptionsData }) => {
     setLlmModel(event.target.value);
   };
 
-  const handleNLastSliderChange = (event) => {
-    setNLastTokens(event.target.value);
+  const handleSliderChange = (setValue) => (event) => {
+    setValue(event.target.value);
   };
-
-  const handleNBestSliderChange = (event) => {
-    setNBestTokens(event.target.value);
-  };
-  const updateOptions = () => {
-    setOptionsData({
-      use_history: useHistory,
-      history_type: historyType,
-      llm_model: llmModel,
-      n_last_tokens: nLastTokens,
-      n_best_tokens: nBestTokens,
-    });
-  }
 
   // Check if the selected model exists and get the context_limit
   // so i have defined context limit even when the models are not fetched
@@ -122,19 +124,22 @@ const ChatOptions = ({ options, setOptionsData }) => {
         </div>
       </div>
 
-      <div className="option">
-        <label htmlFor="history-type">History Type:</label>
-        <div className="toggle-switch">
-          <button
-            type="button"
-            className={`history-type-toggle ${historyType}`}
-            onClick={handleHistoryTypeToggle}
-          >
-            {historyType === Constants.N_BEST_TOKENS_TYPE ? 'Best tokens' : 'Last tokens'}
-          </button>
-        </div>
+
+    <div className="option">
+      <label htmlFor="history-type">History Type:</label>
+      <div className="toggle-switch">
+        <button
+          type="button"
+          className={`history-type-toggle ${historyType}`}
+          onClick={handleHistoryTypeToggle}
+          disabled={!useHistory}
+        >
+          {historyType === Constants.N_BEST_TOKENS_TYPE ? 'Best tokens' : 'Last tokens'}
+        </button>
       </div>
-      
+    </div>
+
+
       <div className="option">
         <div className="slider-container">
           <input
@@ -142,7 +147,7 @@ const ChatOptions = ({ options, setOptionsData }) => {
             min="0"
             max={contextLimit}
             value={nLastTokens}
-            onChange={handleNLastSliderChange}
+            onChange={handleSliderChange(setNLastTokens)}
             className="vertical-slider"
             style={{
               writingMode: 'bt-lr', // Vertical text orientation for Firefox compatibility
@@ -169,7 +174,7 @@ const ChatOptions = ({ options, setOptionsData }) => {
             min="0"
             max={contextLimit}
             value={nBestTokens}
-            onChange={handleNBestSliderChange}
+            onChange={handleSliderChange(setNBestTokens)}
             className="vertical-slider"
             style={{
               writingMode: 'bt-lr', // Vertical text orientation for Firefox compatibility
