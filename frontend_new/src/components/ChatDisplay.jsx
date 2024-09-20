@@ -10,6 +10,7 @@ import { fetchEventSource } from '@microsoft/fetch-event-source';
 // TODO special visual for generated code
 // TODO markup
 // TODO nejakej novej errror, kdyz napisu first message, vytvori se novej chat ale nezobrazi se chat, musim chat otevrit znovu abych to videl
+// TODO user muze dat messeage a behem toho co se generuje muze odeslat novou a dela to bordel
 const ChatDisplay = ({ conversationEntries, setConversationEntries, genResponse, optionsData }) => {
   const { accessToken, currentChat, setCurrentChat, addChatToList } = useContext(AppContext); 
   const [eventSource, setEventSource] = useState(null); // State to manage eventSource

@@ -7,7 +7,7 @@ import './MainLayout.css'; // Import a CSS file for styling
 
 //TODO odeslu zpravu ale uz mi vypresel token -> dostanu unathorized || musim udelat refresh a odeslat znovu, nebo dat relace vypresela registrujte se znovu 
 const MainLayout = () => {
-  const { currentChat, handleSelectChat, userPreferences, handleUpdatePreferences } = useContext(AppContext);
+  const { currentChat, handleSelectChat } = useContext(AppContext);
 
   return (
     <div className="main-layout">
@@ -16,7 +16,6 @@ const MainLayout = () => {
       </div>
         <div className="chat-window-container">
         <ChatWindow currentChat={currentChat} />
-        {/* <UserSettings preferences={userPreferences} onUpdatePreferences={handleUpdatePreferences} /> */}
       </div>
     </div>
   );

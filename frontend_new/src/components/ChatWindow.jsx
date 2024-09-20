@@ -45,6 +45,7 @@ const ChatWindow = () => {
         : {};
         console.log(headers);
         const response = await axios.get(url,{ headers });
+
         setConversationEntries(response.data.conversation_entries || []); // Set the chat data in state
         setOptionsData(response.data.options || {}); // Set the options data in state
       } catch (error){
