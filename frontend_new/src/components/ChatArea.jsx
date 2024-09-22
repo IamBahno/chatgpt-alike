@@ -5,7 +5,6 @@ import ChatInput from './ChatInput';
 import axios from 'axios';
 
 
-// TODO refactor
 const ChatArea = ({optionsData, setOptionsData}) => {
   const { apiKey } = useContext(AppContext); // Access the JWT token from context
   const [conversationEntries, setConversationEntries] = useState([]); // State to store fetched chat data
@@ -43,7 +42,7 @@ const ChatArea = ({optionsData, setOptionsData}) => {
         if(apiKey){
             // This function receives the user prompt and passes it down to ChatDisplay
             setConversationEntries((conversationEntries) => [...conversationEntries, { user_prompt: userPrompt, ai_response: '', cost: 0, time: new Date() }]);
-            toggleGenResponse(!genResponse);  
+            toggleGenResponse(prevGenResponse => !prevGenResponse);  
         }
         else{
             // TODO pridat popup ze nelze odeslat bez validniho api_key

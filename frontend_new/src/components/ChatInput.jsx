@@ -32,7 +32,7 @@ const ChatInput = ({ onUserPrompt }) => {
         onKeyDown={handleKeyDown}
         placeholder="Type your message..."
       />
-      <button onClick={handleSend}>Send</button>
+      <button onClick={handleSend} disabled={message.trim() === ''}>Send</button>
     </div>
   );
 };

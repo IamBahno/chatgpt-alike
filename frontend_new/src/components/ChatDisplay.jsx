@@ -74,7 +74,6 @@ const ChatDisplay = ({ conversationEntries, setConversationEntries, genResponse,
       );
   setEventSource(newEventSource);
   };
-  // nejak se rozbilo, ukladani zprav
   const handleSendFirstMessage = async (userPrompt) => {
       const enpoint = "http://localhost:8000/chat/first_message";
       // Make a POST request to send the user's prompt to the backend

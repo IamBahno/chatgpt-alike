@@ -173,6 +173,7 @@ async def get_openai_generator(prompt: str, options: ChatOption, chat: Chat,user
 
     yield f'data: {json.dumps({"type": "final", "data": {"cost": cost, "chat_id": chat.id, "chat_title":chat.title}})}\n\n'
 
+# TODO kdyz mam novej chat nebo pisu do jinyho chatu tak to trba dlouho nez to vygeneruje
 # TODO do budoucna dodelat ze se jmeno bude generovat pararelne/asynchrone
 # TODO dodelat handling kdyz to selze
 @router.post("/first_message")
