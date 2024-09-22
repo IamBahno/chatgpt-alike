@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import './ChatOptions.css'; // Optional: CSS for styling
 import * as Constants from '../constants';
 
+// TODO zobrazovat cenu chatu
 const ChatOptions = ({ options, setOptionsData }) => {
   // State variables initialized to null to prevent incorrect renders
   const [useHistory, setUseHistory] = useState(null);

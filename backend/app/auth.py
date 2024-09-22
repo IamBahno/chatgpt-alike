@@ -274,8 +274,8 @@ async def refresh_token(refresh_request: RefreshRequest, db: Session = Depends(g
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate refresh token.")
 
 
-#TODO dodelat funkcnost aby to mohl posilat i loglej user(mozna funguje tezko se testuje)
 #TODO obcas user bez tokenu posle, kterej uz mel nekdo jinej(treba on), a vytvori se novej user se stejnym api_key, co udela uniquenest constraint
+#TODO puvodne jsem myslel ze kdyz user da apikey, tak se podivam jestli uz usesr s takovym api key nexistuje a jestli ano tak ho fetchnu aby mel stejnou historii
 # if user is logged in update his api key and return token
 # if user is not logged in create empty user with api key and return token
 # if is not logged in but already gave api_key, update his model and return token 
