@@ -9,9 +9,7 @@ import { fetchEventSource } from '@microsoft/fetch-event-source';
 // TODO add button that creates a new chat
 // TODO special visual for generated code
 // TODO markup
-// TODO nejakej novej errror, kdyz napisu first message, vytvori se novej chat ale nezobrazi se chat, musim chat otevrit znovu abych to videl
-// TODO user muze dat messeage a behem toho co se generuje muze odeslat novou a dela to bordel
-const ChatDisplay = ({ conversationEntries, setConversationEntries, genResponse, optionsData }) => {
+const ChatDisplay = ({ conversationEntries, setConversationEntries, genResponse, optionsData, setGeneratingResponse }) => {
   const { accessToken, currentChat, setCurrentChat, addChatToList } = useContext(AppContext); 
 
   const handleSendEventSource = async (endpoint,body) => {
@@ -76,6 +74,9 @@ const ChatDisplay = ({ conversationEntries, setConversationEntries, genResponse,
         },
       },
     );
+
+    // the response is generated
+    setGeneratingResponse(false);
     // Cleanup function to close the eventSource when the component unmounts
     return () => {
       if (eventSource) {

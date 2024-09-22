@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 // import './ChatInput.css'; // Optional: CSS for styling
 
-const ChatInput = ({ onUserPrompt }) => {
+const ChatInput = ({ onUserPrompt, generatingResponse }) => {
   const [message, setMessage] = useState('');
 
   const handleInputChange = (e) => {
@@ -32,7 +32,7 @@ const ChatInput = ({ onUserPrompt }) => {
         onKeyDown={handleKeyDown}
         placeholder="Type your message..."
       />
-      <button onClick={handleSend} disabled={message.trim() === ''}>Send</button>
+      <button onClick={handleSend} disabled={message.trim() === '' || generatingResponse}>Send</button>
     </div>
   );
 };

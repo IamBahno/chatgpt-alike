@@ -4,9 +4,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import './ChatOptions.css'; // Optional: CSS for styling
 import * as Constants from '../constants';
 
-//TODO dokud se nelognu neni tam context limit
-//TODO kdyz use hostory false, tak to vypne, toggle na history type, ale slidery porad funguji, + aby byl aktivni pouze slider vybraneho typu
-//TODO kdyz use history false, nemela by byt moznost menit nastaveni historie
 const ChatOptions = ({ options, setOptionsData }) => {
   // State variables initialized to null to prevent incorrect renders
   const [useHistory, setUseHistory] = useState(null);
@@ -149,6 +146,7 @@ const ChatOptions = ({ options, setOptionsData }) => {
             value={nLastTokens}
             onChange={handleSliderChange(setNLastTokens)}
             className="vertical-slider"
+            disabled={!useHistory || historyType !== Constants.N_LAST_TOKENS_TYPE}
             style={{
               writingMode: 'bt-lr', // Vertical text orientation for Firefox compatibility
             }}
@@ -176,6 +174,7 @@ const ChatOptions = ({ options, setOptionsData }) => {
             value={nBestTokens}
             onChange={handleSliderChange(setNBestTokens)}
             className="vertical-slider"
+            disabled={!useHistory || historyType !== Constants.N_BEST_TOKENS_TYPE}
             style={{
               writingMode: 'bt-lr', // Vertical text orientation for Firefox compatibility
             }}

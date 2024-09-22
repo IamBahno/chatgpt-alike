@@ -9,7 +9,7 @@ const ChatArea = ({optionsData, setOptionsData}) => {
   const { apiKey } = useContext(AppContext); // Access the JWT token from context
   const [conversationEntries, setConversationEntries] = useState([]); // State to store fetched chat data
   const [genResponse, toggleGenResponse] = useState(false); // State to store fetched options data
-
+  const [generatingResponse, setGeneratingResponse] = useState(false); // Loading state
 
   const { accessToken, currentChat} = useContext(AppContext); // Access the JWT token from context
 
@@ -37,23 +37,23 @@ const ChatArea = ({optionsData, setOptionsData}) => {
 
   }, [currentChat,accessToken])
 
-    const handleUserPrompt = (userPrompt) => {
-        // checks if there is valid api_key
-        if(apiKey){
-            // This function receives the user prompt and passes it down to ChatDisplay
-            setConversationEntries((conversationEntries) => [...conversationEntries, { user_prompt: userPrompt, ai_response: '', cost: 0, time: new Date() }]);
-            toggleGenResponse(prevGenResponse => !prevGenResponse);  
-        }
-        else{
-            // TODO pridat popup ze nelze odeslat bez validniho api_key
-            console.log("nelze odeslat bez valid api key")
-        }
-    }
-
+  const handleUserPrompt = (userPrompt) => {
+      // checks if there is valid api_key
+      if(apiKey){
+          setGeneratingResponse(true);
+          // This function receives the user prompt and passes it down to ChatDisplay
+          setConversationEntries((conversationEntries) => [...conversationEntries, { user_prompt: userPrompt, ai_response: '', cost: 0, time: new Date() }]);
+          toggleGenResponse(prevGenResponse => !prevGenResponse);  
+      }
+      else{
+          // TODO pridat popup ze nelze odeslat bez validniho api_key
+          console.log("nelze odeslat bez valid api key")
+      }
+  }
     return (
         <div className='chat-area'>
-            <ChatDisplay conversationEntries={conversationEntries} setConversationEntries={setConversationEntries} genResponse={genResponse} optionsData={optionsData}/>
-            <ChatInput onUserPrompt={handleUserPrompt} />
+            <ChatDisplay conversationEntries={conversationEntries} setConversationEntries={setConversationEntries} genResponse={genResponse} optionsData={optionsData} setGeneratingResponse={setGeneratingResponse}/>
+            <ChatInput onUserPrompt={handleUserPrompt} generatingResponse={generatingResponse}/>
         </div>
     );
 };
