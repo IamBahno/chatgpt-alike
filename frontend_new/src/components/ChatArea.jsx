@@ -3,7 +3,7 @@ import { AppContext } from '../context/AppContextProvider';
 import ChatDisplay from './ChatDisplay';
 import ChatInput from './ChatInput';
 import axios from 'axios';
-
+import './ChatArea.css';
 
 const ChatArea = ({optionsData, setOptionsData}) => {
   const { apiKey } = useContext(AppContext); // Access the JWT token from context

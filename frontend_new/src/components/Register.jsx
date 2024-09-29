@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import './Modal.css'; // Import your new CSS for styling
 
 const RegisterModal = ({ onClose, handleLogin }) => {
   const [username, setUsername] = useState('');

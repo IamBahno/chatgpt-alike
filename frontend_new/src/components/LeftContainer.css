@@ -1,3 +1,20 @@
+/* LeftContainer.css */
+
 .left-container {
     flex: 0 0 20%;
+    height: 100vh; /* Make the layout take the full viewport height */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Ensure spacing between items */
+    background-color: var(--color-background);
+    color: var(--color-3)
 }
+
+.left-container h1 {
+    font-size: 2.5rem; /* Customize the font size */
+    color: var(--color-1); /* Change the text color */
+    margin-bottom: 20px; /* Add space below the h1 */
+    text-align: center; /* Center the text */
+    font-weight: bold; /* Make the text bold */
+  }
+  

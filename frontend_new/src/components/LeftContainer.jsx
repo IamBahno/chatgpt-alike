@@ -1,8 +1,8 @@
-import React, { useContext, useState } from 'react';
+import React from 'react';
 import ChatList from './ChatList';
 import AuthenticationArea from './AuthenticationArea';
 import './LeftContainer.css'
-
+//TODO kdyz kliknu na jmeno applikace ma me to dat na hlavni stranku
 const LeftContainer = () => {
 
   return (

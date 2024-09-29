@@ -1,0 +1,50 @@
+.api-key-manager {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.api-key-manager label {
+    font-size: 0.9rem;
+    color: var(--color-1);
+}
+
+.api-key-manager input {
+    padding: 8px;
+    border: 1px solid var(--color-2);
+    border-radius: 4px;
+    background-color: var(--color-background);
+    color: var(--color-1);
+    font-size: 0.9rem;
+    transition: border-color 0.3s;
+    margin-bottom: 0;
+}
+
+.api-key-manager input:focus {
+    border-color: var(--color-3);
+    outline: none;
+}
+
+.api-key-manager button {
+    margin-top: 0;
+    padding: 8px 16px;
+    border: 1px solid var(--color-2);
+    background-color: var(--color-background);
+    color: var(--color-1);
+    font-size: 0.9rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+
+.api-key-manager button:hover {
+    background-color: var(--color-2);
+    color: var(--color-background);
+    border-color: var(--color-3);
+}
+
+.api-key-manager button:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-1);
+}

@@ -1,0 +1,67 @@
+.authentication-area {
+    margin-left: 20px;
+    margin-bottom: 20px;
+    margin-right: 20px;
+
+}
+
+.auth-buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.auth-buttons button {
+    background-color: var(--color-background);
+    color: var(--color-1);
+    border: 1px solid var(--color-2);
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+    flex: 1;
+    margin: 0 10px; /* Optional spacing between the buttons */
+}
+
+.auth-buttons button:hover {
+    background-color: var(--color-2);
+    color: var(--color-background);
+    border-color: var(--color-3);
+}
+
+.auth-buttons button:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-1);
+}
+
+
+.authentication-separator {
+    border-top: 1px solid var(--color-2); /* Subtle line */
+    margin-bottom: 10px; /* Add space above and below the separator */
+    margin-top: 0px; /* Add space above and below the separator */
+}
+
+
+/* Styles for the user info and logout button */
+.user-info {
+    display: flex; /* Use flexbox for layout */
+    align-items: center; /* Center items vertically */
+    gap: 10px; /* Space between text and button */
+    font-size: 16px; /* Adjust font size for user info */
+}
+
+.user-info button {
+    margin-left: auto; /* Push logout button to the far right */
+    padding: 8px 12px; /* Padding for buttons */
+    background-color: var(--color-1); /* Use your custom color */
+    color: white; /* Button text color */
+    border: none; /* No border */
+    border-radius: 4px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s ease; /* Transition for hover effect */
+}
+
+.user-info button:hover {
+    background-color: var(--color-2); /* Change background color on hover */
+}

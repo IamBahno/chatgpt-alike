@@ -1,35 +1,46 @@
 /* src/components/ChatList.css */
 
 .chat-list {
-  padding: 10px;
-  max-height: 80vh; /* Limits the height of the chat list */
-  overflow-y: auto; /* Enables scrolling if the list is too long */
-  background-color: #f5f5f5; /* Light background for contrast */
-  border-radius: 8px; /* Rounded corners for the list container */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for a lifted effect */
+  flex-grow: 1; /* Makes the chat list fill available vertical space */
+  overflow-y: auto; /* Allows vertical scrolling */
+  padding: 10px; /* Padding around the list */
+  background-color: var(--color-background); /* Background color for the chat list */
+  border-radius: 8px; /* Rounded corners */
 }
 
+/* Individual chat items */
 .chat-item {
-  padding: 12px 16px; /* Adjusted padding for better spacing */
-  margin: 6px 0; /* Margin between chat items */
-  background-color: #eaeaea; /* Default background color */
-  cursor: pointer; /* Pointer cursor on hover */
-  border-radius: 5px; /* Rounded corners for each chat item */
-  transition: background-color 0.3s, transform 0.1s; /* Smooth transition effects */
+  padding: 15px; /* Space inside each chat item */
+  margin-bottom: 10px; /* Space between chat items */
+  background-color: var(--color-3); /* Default background for chat item */
+  border-radius: 6px; /* Rounded corners for each chat item */
+  cursor: pointer; /* Changes cursor to pointer on hover */
+  color: var(--color-background); /* Text color */
+  font-size: 1rem; /* Font size for chat items */
+  transition: background-color 0.3s ease; /* Smooth transition for background color */
 }
 
+/* Hover effect for chat items */
 .chat-item:hover {
-  background-color: #d3d3d3; /* Slightly darker on hover */
-  transform: translateX(2px); /* Small movement on hover for interaction feedback */
+  background-color: var(--color-4); /* Darker background on hover */
 }
 
+/* Active chat item (currently selected) */
 .chat-item.active {
-  background-color: #007bff; /* Highlight color for active chat */
-  color: white; /* White text for contrast on active chat */
-  font-weight: bold; /* Bold text to emphasize active chat */
-  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3); /* Shadow effect to highlight active chat */
+  background-color: var(--color-4); /* Highlight color for active chat */
+  color: #ffffff; /* Ensures text is readable */
 }
 
-.chat-item.active:hover {
-  background-color: #0056b3; /* Darker blue on hover for active chat */
+/* Scrollbar styling (for webkit-based browsers) */
+.chat-list::-webkit-scrollbar {
+  width: 8px; /* Width of the scrollbar */
+}
+
+.chat-list::-webkit-scrollbar-thumb {
+  background-color: var(--color-3); /* Scrollbar color */
+  border-radius: 4px; /* Rounded corners for scrollbar */
+}
+
+.chat-list::-webkit-scrollbar-track {
+  background-color: var(--color-2); /* Background color behind the scrollbar */
 }
