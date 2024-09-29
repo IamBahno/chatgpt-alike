@@ -1,7 +1,7 @@
 // src/components/ChatInput.jsx
 
 import React, { useState } from 'react';
-// import './ChatInput.css'; // Optional: CSS for styling
+import './ChatInput.css'; // Optional: CSS for styling
 
 const ChatInput = ({ onUserPrompt, generatingResponse }) => {
   const [message, setMessage] = useState('');

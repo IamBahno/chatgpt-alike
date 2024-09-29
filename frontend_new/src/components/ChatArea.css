@@ -6,4 +6,12 @@
     padding: 20px;
     box-sizing: border-box;
     position: relative;
+    background-color: var(--color-background);
+}
+/* Responsive changes for smaller screens */
+@media (max-width: 768px) {
+    /* Stack the elements vertically for smaller screens */
+    .chat-area {
+        flex-direction: column;
+    }
 }

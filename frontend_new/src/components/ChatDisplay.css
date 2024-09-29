@@ -1,43 +1,73 @@
 /* src/components/ChatDisplay.css */
 
-/* ChatDisplay styling */
+/* ChatDisplay container styling */
 .chat-display {
-  width: 60%; /* Take up 60% of the screen's width */
-  max-width: 900px; /* Max width to prevent stretching on large screens */
-  padding: 20px;
-  background-color: var(--color-background); /* Custom background color */
-  border: 1px solid var(--color-1); /* Border for the chat display */
-  border-radius: 10px;
-  overflow-y: auto; /* Scroll if content exceeds */
   flex-grow: 1;
+  width: 60%;
+  max-width: 900px;
+  padding: 20px;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-1);
+  border-radius: 10px;
+  overflow-y: auto;
+  margin-right: auto; /* Align more to the left */
+  margin-left: 10%; /* Adjust as needed for the left shift */
 }
-  
-  .conversation-entry {
-    margin-bottom: 15px;
-    padding: 10px;
-    border-bottom: 1px solid #eee;
+
+/* Message styling */
+.conversation-entry {
+  margin-bottom: 15px;
+  padding: 10px;
+  border-radius: 5px;
+  background-color: var(--color-2);
+  position: relative; /* Ensures absolute positioning works for hovering cost */
+}
+
+/* User and AI messages */
+.chat-message {
+  margin-bottom: 5px;
+}
+
+.chat-message.user {
+  color: var(--color-3);
+}
+
+.chat-message.ai {
+  color: var(--color-1);
+}
+
+/* Cost and timestamp initially hidden */
+.entry-details {
+  font-size: 12px;
+  color: var(--color-3);
+  opacity: 0; /* Hide by default */
+  transition: opacity 0.2s ease-in-out;
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 10px; /* Space between cost and time */
+}
+
+/* Show details on hover */
+.conversation-entry:hover .entry-details {
+  opacity: 1; /* Show on hover */
+}
+
+/* Responsive changes for smaller screens */
+@media (max-width: 768px) {
+  .chat-display {
+    width: 90%;
+    max-width: 100%;
+    padding: 15px;
   }
   
-  .chat-message.user {
-    color: #007bff; /* Color for user messages */
-    margin-bottom: 5px;
-  }
-  
-  .chat-message.ai {
-    color: #28a745; /* Color for AI messages */
-    margin-bottom: 5px;
-  }
-  
+  /* Adjust entry details positioning for small screens */
   .entry-details {
-    font-size: 0.85em;
-    color: #555;
+    top: auto;
+    bottom: 5px;
+    right: 5px;
+    transform: none;
   }
-  
-  .cost {
-    margin-right: 10px;
-  }
-  
-  .timestamp {
-    color: #888;
-  }
-  
+}
