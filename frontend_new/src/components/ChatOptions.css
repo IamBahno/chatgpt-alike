@@ -6,63 +6,160 @@
   right: 20px;
   background-color: var(--color-background);
   border: 1px solid var(--color-1);
-  padding: 10px;
+  padding: 20px;
   border-radius: 8px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
   z-index: 10;
-}
- 
-/* Responsive changes for smaller screens */
-@media (max-width: 1024px) {
-  /* Stack the elements vertically for smaller screens */
-  /* The options container is placed at the bottom for smaller screens */
-  .chat-options {
-      position: relative;
-      top: auto;
-      right: auto;
-      margin-top: 10px;
-      margin-bottom: 10px;
-  }
+  width: 250px; /* Set a fixed width for better layout control */
 }
 
-  .option {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 10px;
-  }
-  
-  .slider-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .vertical-slider {
-    -webkit-appearance: none;
-    width: 300px; /* The width of the slider (will behave like height after rotation) */
-    height: 10px;
-    transform: rotate(-90deg); /* Rotate the slider to make it vertical */
-    margin: 20px 0;
-  }
-  
-  .vertical-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 20px; /* Size of the thumb */
-    height: 20px;
-    background: #4CAF50;
-    cursor: pointer;
-  }
-  
-  .vertical-slider::-moz-range-thumb {
-    width: 20px;
-    height: 20px;
-    background: #4CAF50;
-    cursor: pointer;
-  }
-  
-  .slider-value {
-    font-size: 1.2rem;
+/* Individual option container */
+.option {
+  margin-bottom: 15px;
+  display: flex; /* Align items horizontally */
+  align-items: center; /* Center items vertically */
+}
+
+/* Label styling */
+.option label {
+  font-weight: bold;
+  margin-right: 10px; /* Space between the label and toggle */
+  color: var(--color-2);
+}
+
+/* Toggle switch styling */
+.toggle-switch {
+  display: flex;
+  align-items: center;
+}
+
+/* Hide the default checkbox */
+.toggle-checkbox {
+  display: none; 
+}
+
+/* Toggle label styling */
+.toggle-label {
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+  background-color: var(--color-2); /* Default background color */
+  border-radius: 50px;
+  position: relative;
+  cursor: pointer;
+}
+
+.toggle-button {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: var(--color-background); /* Background color of the toggle button */
+  transition: transform 0.3s ease;
+}
+.history-type-toggle {
+  background-color: var(--color-1);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer; /* Change cursor to pointer */
+  transition: background-color 0.3s ease; /* Smooth transition on hover */
+}
+
+.history-type-toggle:hover {
+  background-color: var(--color-2); /* Change color on hover */
+}
+
+
+/* Slider container */
+.slider-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* General slider track styling */
+.slider-container input[type="range"] {
+  -webkit-appearance: none; /* Removes default styling in WebKit browsers */
+  width: 100%; /* Full width */
+  height: 8px; /* Height of the slider track */
+  border-radius: 5px; /* Rounded edges for the track */
+  background: var(--color-1); /* Background color of the track */
+  outline: none; /* Remove outline */
+  margin: 10px 0; /* Space around the slider */
+  transition: background 0.3s ease; /* Smooth transition on hover */
+}
+
+/* Slider thumb styling for WebKit browsers (Chrome, Safari) */
+.slider-container input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; /* Removes default styling in WebKit browsers */
+  height: 20px; /* Height of the thumb */
+  width: 20px; /* Width of the thumb */
+  border-radius: 50%; /* Round thumb */
+  background: var(--color-background); /* Background color of the thumb */
+  cursor: pointer; /* Change cursor to pointer */
+  transition: background 0.3s ease; /* Smooth transition on hover */
+}
+
+/* Slider thumb styling for Mozilla browsers (Firefox) */
+.slider-container input[type="range"]::-moz-range-thumb {
+  height: 20px; /* Height of the thumb */
+  width: 20px; /* Width of the thumb */
+  border-radius: 50%; /* Round thumb */
+  background: var(--color-background); /* Background color of the thumb */
+  cursor: pointer; /* Change cursor to pointer */
+  transition: background 0.3s ease; /* Smooth transition on hover */
+}
+
+/* Disabled slider styling */
+.slider-container input[type="range"]:disabled {
+  background: var(--color-2); /* Lighter background color for disabled state */
+  cursor: not-allowed; /* Not allowed cursor */
+}
+
+/* Disabled thumb styling */
+.slider-container input[type="range"]:disabled::-webkit-slider-thumb {
+  background: var(--color-3); /* Change thumb color for disabled state */
+  opacity: 0.5; /* Reduced opacity for disabled thumb */
+}
+
+.slider-container input[type="range"]:disabled::-moz-range-thumb {
+  background: var(--color-3); /* Change thumb color for disabled state */
+  opacity: 0.5; /* Reduced opacity for disabled thumb */
+}
+
+/* Styling for slider value display */
+.slider-value {
+  font-size: 14px; /* Font size for slider value */
+  color: var(--color-3); /* Color for slider value text */
+}
+
+/* Additional styling for the label */
+.slider-label {
+  font-weight: bold; /* Make the label text bold */
+  margin-bottom: 10px; /* Space between the label and the sliders */
+  color: var(--color-2); /* Match your design color */
+}
+
+.slider-container > div {
+  margin-bottom: 10px; /* Space between each slider section */
+}
+
+.slider-container p {
+  margin: 0; /* Remove default margin */
+}
+
+/* Responsive changes for smaller screens */
+@media (max-width: 1024px) {
+  .chat-options {
+    position: relative;
+    top: auto;
+    right: auto;
+    width: 100%;
     margin-top: 10px;
+    padding: 10px;
   }
-  
+}

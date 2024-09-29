@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import './ChatOptions.css'; // Optional: CSS for styling
 import * as Constants from '../constants';
 
+// TODO dodelat css, pro model version popup
 // TODO zobrazovat cenu chatu
 const ChatOptions = ({ options, setOptionsData }) => {
   // State variables initialized to null to prevent incorrect renders
@@ -13,6 +14,15 @@ const ChatOptions = ({ options, setOptionsData }) => {
   const [nLastTokens, setNLastTokens] = useState(0);
   const [nBestTokens, setNBestTokens] = useState(0);
   const [models, setModels] = useState([]);
+  const rootStyles = getComputedStyle(document.documentElement);
+  const backgroundColor = rootStyles.getPropertyValue('--color-background').trim();
+  const color1 = rootStyles.getPropertyValue('--color-1').trim();
+  const color2 = rootStyles.getPropertyValue('--color-2').trim();
+  const color3 = rootStyles.getPropertyValue('--color-3').trim();
+  const color4 = rootStyles.getPropertyValue('--color-4').trim();
+
+  
+
 
   useEffect(() => {
     const fetchModels = async () => {
@@ -107,82 +117,83 @@ const ChatOptions = ({ options, setOptionsData }) => {
       </div>
 
 
+
       <div className="option">
-        <label htmlFor="use-history">Use History:</label>
-        <div className="toggle-switch">
-          <input
-            type="checkbox"
-            id="use-history"
-            checked={useHistory}
-            onChange={handleUseHistoryToggle}
-          />
-          <label className="toggle-label" htmlFor="use-history">
-            <span className="toggle-button" />
-          </label>
-        </div>
-      </div>
-
-
-    <div className="option">
-      <label htmlFor="history-type">History Type:</label>
+      <label htmlFor="use-history">Use History:</label>
       <div className="toggle-switch">
-        <button
-          type="button"
-          className={`history-type-toggle ${historyType}`}
-          onClick={handleHistoryTypeToggle}
-          disabled={!useHistory}
-        >
-          {historyType === Constants.N_BEST_TOKENS_TYPE ? 'Best tokens' : 'Last tokens'}
-        </button>
+        <input
+          type="checkbox"
+          id="use-history"
+          checked={useHistory}
+          onChange={handleUseHistoryToggle}
+          className="toggle-checkbox"
+        />
+        <label className="toggle-label" htmlFor="use-history">
+          <span className="toggle-button" style={{
+            transform: useHistory ? 'translateX(26px)' : 'translateX(0)',
+            backgroundColor: useHistory ? color3 : color4, // Replace with your color values
+          }} />
+        </label>
       </div>
     </div>
 
 
-      <div className="option">
-        <div className="slider-container">
-          <input
-            type="range"
-            min="0"
-            max={contextLimit}
-            value={nLastTokens}
-            onChange={handleSliderChange(setNLastTokens)}
-            className="vertical-slider"
-            disabled={!useHistory || historyType !== Constants.N_LAST_TOKENS_TYPE}
-            style={{
-              writingMode: 'bt-lr', // Vertical text orientation for Firefox compatibility
-            }}
-          />
-          <div className="slider-value">{nLastTokens}</div>
-        </div>
-      </div>
-      <br/>
-      <br/>
-      <br/>
-      <br/>
-      <br/>
-      <br/>
-      <br/>
-      <br/>
-      <br/>
-      <br/>
-      <br/>
-      <div className="option">
-        <div className="slider-container">
-          <input
-            type="range"
-            min="0"
-            max={contextLimit}
-            value={nBestTokens}
-            onChange={handleSliderChange(setNBestTokens)}
-            className="vertical-slider"
-            disabled={!useHistory || historyType !== Constants.N_BEST_TOKENS_TYPE}
-            style={{
-              writingMode: 'bt-lr', // Vertical text orientation for Firefox compatibility
-            }}
-          />
-          <div className="slider-value">{nBestTokens}</div>
-        </div>
-      </div>
+    <div className="option">
+  <label htmlFor="history-type">History Type:</label>
+  <div className="toggle-switch">
+    <button
+      type="button"
+      className={`history-type-toggle ${historyType}`}
+      onClick={handleHistoryTypeToggle}
+      disabled={!useHistory}
+      title="Click to toggle between Best tokens and Last tokens" // Tooltip
+    >
+      {historyType === Constants.N_BEST_TOKENS_TYPE ? 'Best tokens' : 'Last tokens'}
+    </button>
+  </div>
+</div>
+
+<div className="option">
+  <div className="slider-container">
+    <p className="slider-label">Choose Token Context Limit:</p> {/* Single label for both sliders */}
+    
+    <div>
+      <p>Last Tokens:</p> {/* Sub-label for Last Tokens */}
+      <input
+        type="range"
+        min="0"
+        max={contextLimit}
+        value={nLastTokens}
+        onChange={handleSliderChange(setNLastTokens)}
+        className="vertical-slider"
+        disabled={!useHistory || historyType !== Constants.N_LAST_TOKENS_TYPE}
+        style={{
+          writingMode: 'bt-lr', // Vertical text orientation for Firefox compatibility
+        }}
+      />
+      <div className="slider-value">{nLastTokens}</div>
+    </div>
+    
+    <div>
+      <p>Best Tokens:</p> {/* Sub-label for Best Tokens */}
+      <input
+        type="range"
+        min="0"
+        max={contextLimit}
+        value={nBestTokens}
+        onChange={handleSliderChange(setNBestTokens)}
+        className="vertical-slider"
+        disabled={!useHistory || historyType !== Constants.N_BEST_TOKENS_TYPE}
+        style={{
+          writingMode: 'bt-lr', // Vertical text orientation for Firefox compatibility
+        }}
+      />
+      <div className="slider-value">{nBestTokens}</div>
+    </div>
+  </div>
+</div>
+
+
   </div>
   );
 };
