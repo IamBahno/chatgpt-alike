@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from .database import get_db
 from .schemas import GeneralResponse, SetKeyRequest, RegisterRequest, LoginRequest, User, RefreshRequest
 from sqlalchemy.orm import Session
+import sqlalchemy
 from .models import User as UserModel
 from sqlalchemy.exc import NoResultFound,IntegrityError 
 import bcrypt
@@ -274,24 +275,31 @@ async def refresh_token(refresh_request: RefreshRequest, db: Session = Depends(g
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate refresh token.")
 
 
-#TODO obcas user bez tokenu posle, kterej uz mel nekdo jinej(treba on), a vytvori se novej user se stejnym api_key, co udela uniquenest constraint
-#TODO puvodne jsem myslel ze kdyz user da apikey, tak se podivam jestli uz usesr s takovym api key nexistuje a jestli ano tak ho fetchnu aby mel stejnou historii
 # if user is logged in update his api key and return token
 # if user is not logged in create empty user with api key and return token
 # if is not logged in but already gave api_key, update his model and return token 
 @router.post("/api_key",response_model=Token)
 async def set_api_key(set_key_request:SetKeyRequest,db: Session = Depends(get_db),
                       current_user: UserModel = Depends(get_current_user_or_create_one)):
-    if(not validate_openai_key(set_key_request.api_key)):
-        # Return a custom JSON response, bypassing the response_model
-        return JSONResponse(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            content={
-                "status": "error",
-                "message": "Invalid API key provided. Please check your key and try again."
-            }
-        )
-    current_user.api_key = set_key_request.api_key
+    try: #check if api key is already used
+        saved_user = db.query(UserModel).filter(UserModel.api_key == set_key_request.api_key).one()
+    except sqlalchemy.exc.NoResultFound:
+        # new api key
+        print("new aoi key")
+        current_user.api_key = set_key_request.api_key
+        if(not validate_openai_key(set_key_request.api_key)):
+            # Return a custom JSON response, bypassing the response_model
+            return JSONResponse(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                content={
+                    "status": "error",
+                    "message": "Invalid API key provided. Please check your key and try again."
+                }
+            )
+    else: # if the user exists
+        print("getting old user with his api key")
+        current_user = saved_user
+
     db.add(current_user)
     db.commit()
     db.refresh(current_user)
