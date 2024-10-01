@@ -9,6 +9,7 @@ import { fetchEventSource } from '@microsoft/fetch-event-source';
 // TODO add button that creates a new chat
 // TODO special visual for generated code
 // TODO markup
+// TODO No conversation entries
 const ChatDisplay = ({ conversationEntries, setConversationEntries, genResponse, optionsData, setGeneratingResponse }) => {
   const { accessToken, currentChat, setCurrentChat, addChatToList } = useContext(AppContext); 
 

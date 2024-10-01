@@ -33,6 +33,55 @@
   align-items: center;
 }
 
+/* Dropdown (select) styling */
+.option select {
+  width: 100%; /* Full width */
+  padding: 8px 12px; /* Padding for a better look */
+  font-size: 14px; /* Font size for text */
+  background-color: var(--color-background); /* Matches background color */
+  color: var(--color-3); /* Text color */
+  border: 1px solid var(--color-1); /* Border color */
+  border-radius: 5px; /* Rounded edges */
+  outline: none; /* Remove default outline */
+  appearance: none; /* Remove default arrow in some browsers */
+  cursor: pointer; /* Cursor indicates interactable element */
+  transition: border-color 0.3s ease, background-color 0.3s ease; /* Smooth transitions */
+}
+
+/* Dropdown on focus/hover */
+.option select:focus,
+.option select:hover {
+  border-color: var(--color-2); /* Change border color on focus/hover */
+}
+
+/* Styling for the dropdown arrow */
+.option select::-ms-expand {
+  display: none; /* Remove the default dropdown arrow for Internet Explorer */
+}
+
+/* Dropdown container for custom arrow styling */
+.option .select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.option .select-wrapper::after {
+  content: '▼'; /* Custom dropdown arrow */
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  color: var(--color-3); /* Arrow color matches text color */
+  pointer-events: none; /* Ensures the arrow doesn't interfere with clicks */
+}
+
+/* Disabled dropdown styling */
+.option select:disabled {
+  background-color: var(--color-2); /* Disabled background color */
+  color: var(--color-3); /* Disabled text color */
+  cursor: not-allowed; /* Disabled cursor */
+}
+
 /* Hide the default checkbox */
 .toggle-checkbox {
   display: none; 

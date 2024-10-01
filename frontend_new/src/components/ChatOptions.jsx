@@ -106,6 +106,7 @@ const ChatOptions = ({ options, setOptionsData }) => {
 
       <div className="option">
         <label htmlFor="ai-model">Select AI Model:</label>
+        <div className="select-wrapper">
         <select id="ai-model" value={llmModel} onChange={handleModelChange}>
           <option value="" disabled>Select a model</option>
           {models.map((model) => (
@@ -114,6 +115,7 @@ const ChatOptions = ({ options, setOptionsData }) => {
             </option>
           ))}
         </select>
+        </div>
       </div>
 
 

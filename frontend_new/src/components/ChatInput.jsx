@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import './ChatInput.css'; // Optional: CSS for styling
-
+//TODO kdyz odesle bez api key zprava se strati
 const ChatInput = ({ onUserPrompt, generatingResponse }) => {
   const [message, setMessage] = useState('');
 
