@@ -33,6 +33,39 @@
   align-items: center;
 }
 
+/* Collapsed state: only show the cog icon */
+.chat-options.collapsed {
+  width: 50px; /* Smaller width for the collapsed state */
+  height: 50px;
+  padding: 0;
+  background-color: var(--color-background);
+  border-radius: 50%; /* Make it a circle */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+/* Cog icon styling */
+.cog-icon {
+  font-size: 24px;
+  color: var(--color-2);
+  cursor: pointer;
+}
+
+/* Collapse button to close the panel */
+.collapse-button {
+  margin: 0px;
+  background-color: transparent;
+  border: none;
+  color: var(--color-1);
+  font-size: 16px;
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  cursor: pointer;
+}
+
 /* Dropdown (select) styling */
 .option select {
   width: 100%; /* Full width */
