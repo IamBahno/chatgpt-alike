@@ -9,7 +9,6 @@ import { fetchEventSource } from '@microsoft/fetch-event-source';
 // TODO add button that creates a new chat
 // TODO special visual for generated code
 // TODO markup
-// TODO No conversation entries
 const ChatDisplay = ({ conversationEntries, setConversationEntries, genResponse, optionsData, setGeneratingResponse }) => {
   const { accessToken, currentChat, setCurrentChat, addChatToList } = useContext(AppContext); 
 
@@ -114,7 +113,8 @@ const ChatDisplay = ({ conversationEntries, setConversationEntries, genResponse,
     }
   
     if (conversationEntries.length === 0) {
-      return <div>No conversation entries available.</div>; // Show this if there are no entries
+      return <div className="chat-display"/>;
+
     }
   return (
     <div className="chat-display">
