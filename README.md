@@ -4,4 +4,5 @@ source venv/bin/activate
 python main.py
 
 cd frontend
+npm install
 npm run start

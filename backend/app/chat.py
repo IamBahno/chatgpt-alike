@@ -20,8 +20,8 @@ from .chat_history import get_chat_context
 router = APIRouter()
 load_dotenv()
 
-N_BEST_TOKENS_TYPE = "N_BEST_TOKENS"
-N_LAST_TOKENS_TYPE = "N_LAST_TOKENS"
+N_BEST_TOKENS_TYPE = "N_BEST_TOKENS_TYPE"
+N_LAST_TOKENS_TYPE = "N_LAST_TOKENS_TYPE"
 
 DEFAULT_OPTIONS = {
     "use_history":True,

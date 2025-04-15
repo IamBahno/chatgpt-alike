@@ -28,7 +28,7 @@ const ChatOptions = ({ options, setOptionsData }) => {
   useEffect(() => {
     const fetchModels = async () => {
       try {
-        const response = await fetch('http://localhost:8000/chat/models'); // Replace with your actual endpoint
+        const response = await fetch('http://localhost:8000/chat/models');
         if (response.ok) {
           const data = await response.json();
           setModels(data.models);
